@@ -1,11 +1,10 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
+	"id": "p2p-file-share",
+	"name": "Peer2Peer File Share",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"description": "A plugin to share file via p2p",
+	"author": "muckmuck",
+	"authorUrl": "https://github.com/muckmuck96",
 	"isDesktopOnly": false
 }
