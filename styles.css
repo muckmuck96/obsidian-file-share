@@ -6,3 +6,37 @@ available in the app when your plugin is enabled.
 If your plugin does not need CSS, delete this file.
 
 */
+.file-share-modal {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  .file-share-modal input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    font-size: 1em;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+  }
+  
+  .file-share-list {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  
+  .file-share-item {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--background-modifier-border);
+  }
+  
+  .file-share-item:hover {
+    background-color: var(--background-modifier-hover);
+  }
+  
+  .no-friends {
+    padding: 10px;
+    text-align: center;
+    color: var(--text-muted);
+  }
