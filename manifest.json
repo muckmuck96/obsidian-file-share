@@ -1,9 +1,9 @@
 {
-	"id": "p2p-file-share",
-	"name": "Peer2Peer File Share",
+	"id": "file-share-plugin",
+	"name": "FileShare",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "A plugin to share file via p2p",
+	"description": "End-to-End encrpyted file share for obsidian.md",
 	"author": "muckmuck",
 	"authorUrl": "https://github.com/muckmuck96",
 	"isDesktopOnly": false

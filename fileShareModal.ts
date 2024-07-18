@@ -1,9 +1,8 @@
 import { Modal, Notice, TFile } from "obsidian";
-import * as crypto from 'crypto';
+import * as crypto from "crypto";
 
 interface Friend {
 	username: string;
-	hash: string;
 	publicKey: string;
 }
 
@@ -72,7 +71,7 @@ class FileShareModal extends Modal {
 		this.ws.send(
 			JSON.stringify({
 				type: "checkOnline",
-				target: friend.hash,
+				target: friend.publicKey,
 			})
 		);
 
@@ -80,7 +79,7 @@ class FileShareModal extends Modal {
 			const data = JSON.parse(message.data);
 			if (
 				data.type === "checkOnline" &&
-				data.target === friend.hash
+				data.target === friend.publicKey
 			) {
 				if (data.online) {
 					this.encryptAndSendFile(friend);
@@ -92,45 +91,50 @@ class FileShareModal extends Modal {
 	}
 
 	serializePublicKey(publicKey: string) {
-		return publicKey.trim();
+		return Buffer.from(publicKey, "base64").toString();
 	}
 
 	async encryptAndSendFile(friend: Friend) {
 		if (!this.file) {
-		  new Notice('No file selected');
-		  return;
+			new Notice("No file selected");
+			return;
 		}
 
 		const publicKey = this.serializePublicKey(friend.publicKey);
 		const file = this.file;
 		const fileContent = await this.app.vault.readBinary(file);
-	
+
 		const aesKey = crypto.randomBytes(32); // AES-256 key
 		const iv = crypto.randomBytes(16); // Initialization vector
-	
+
 		// Encrypt the file using AES-256
-		const cipher = crypto.createCipheriv('aes-256-cbc', aesKey, iv);
-		const encryptedFile = Buffer.concat([cipher.update(Buffer.from(fileContent)), cipher.final()]);
-	
+		const cipher = crypto.createCipheriv("aes-256-cbc", aesKey, iv);
+		const encryptedFile = Buffer.concat([
+			cipher.update(Buffer.from(fileContent)),
+			cipher.final(),
+		]);
+
 		// Encrypt the AES key using the receiver's public key (RSA)
 		const encryptedAesKey = crypto.publicEncrypt(publicKey, aesKey);
-	
+
 		const payload = {
-		  file: encryptedFile.toString('base64'),
-		  aesKey: encryptedAesKey.toString('base64'),
-		  iv: iv.toString('base64'),
-		  filename: file.name
+			file: encryptedFile.toString("base64"),
+			aesKey: encryptedAesKey.toString("base64"),
+			iv: iv.toString("base64"),
+			filename: file.name,
 		};
-	
-		this.ws.send(JSON.stringify({
-		  type: 'file',
-		  payload: payload,
-		  target: friend.hash
-		}));
-	
+
+		this.ws.send(
+			JSON.stringify({
+				type: "file",
+				payload: payload,
+				target: friend.publicKey,
+			})
+		);
+
 		new Notice(`File sent to ${friend.username}`);
 		this.close();
-	  }
+	}
 }
 
 export { FileShareModal };

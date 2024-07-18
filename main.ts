@@ -13,62 +13,68 @@ import {
 } from "obsidian";
 import { FileShareModal } from "./fileShareModal";
 import * as crypto from "crypto";
+import AcceptFileModal from "acceptFileModal";
 
 interface Friend {
 	username: string;
-	hash: string;
 	publicKey: string;
 }
 
 interface P2PFileShareSettings {
 	socketUrl: string;
 	friends: Friend[];
-	uniqueHash: string;
 	receiveFolder: string;
 	privateKey: string;
 	publicKey: string;
+	autoAcceptFiles: boolean;
 }
 
 const DEFAULT_SETTINGS: P2PFileShareSettings = {
-	socketUrl: "ws://127.0.0.1:3000",
+	socketUrl: "wss://ws-fileshare.asss.ist",
 	friends: [],
-	uniqueHash: "",
 	receiveFolder: "/",
-	privateKey: '',
-	publicKey: ''
+	privateKey: "",
+	publicKey: "",
+	autoAcceptFiles: false,
 };
 
 class FileSharePlugin extends Plugin {
 	ws: WebSocket;
 	settings: P2PFileShareSettings;
+	connectionStatus: HTMLElement;
 
 	async onload() {
 		await this.loadSettings();
 
 		// Generate RSA key pair if it doesn't exist
 		if (!this.settings.privateKey || !this.settings.publicKey) {
-			const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', {
-			  modulusLength: 2048,
-			});
-			this.settings.privateKey = privateKey.export({ type: 'pkcs1', format: 'pem' }).toString();
-			this.settings.publicKey = publicKey.export({ type: 'pkcs1', format: 'pem' }).toString();
-			await this.saveSettings();
-		  }
-
-		// Generate a unique hash if it doesn't exist
-		if (!this.settings.uniqueHash) {
-			this.settings.uniqueHash = this.generateUniqueHash();
+			const { privateKey, publicKey } = crypto.generateKeyPairSync(
+				"rsa",
+				{
+					modulusLength: 2048,
+				}
+			);
+			this.settings.privateKey = privateKey
+				.export({ type: "pkcs1", format: "pem" })
+				.toString();
+			this.settings.publicKey = Buffer.from(
+				publicKey.export({ type: "pkcs1", format: "pem" }).toString()
+			).toString("base64");
 			await this.saveSettings();
 		}
-		this.initializeWebSocket();
-		
 
-		this.addRibbonIcon("refresh-cw", "Reconnect", () => {
-			if (this.ws.readyState !== WebSocket.OPEN) {
-			  this.initializeWebSocket();
-			  new Notice('Attempting to reconnect WebSocket...');
-			} else {
-			  new Notice('WebSocket is already connected.');
+		this.connectionStatus = this.addStatusBarItem();
+		this.setConnectionStatus("disconnected");
+
+		this.initializeWebSocket();
+
+		this.addRibbonIcon("refresh-cw", "Toggle connection", () => {
+			if (this.ws.readyState === WebSocket.OPEN) {
+				this.ws.close();
+				new Notice("Closing connection...");
+			} else if (this.ws.readyState !== WebSocket.OPEN) {
+				this.initializeWebSocket();
+				new Notice("Trying to connect...");
 			}
 		});
 
@@ -80,15 +86,20 @@ class FileSharePlugin extends Plugin {
 		this.addSettingTab(new FileShareSettingTab(this.app, this));
 	}
 
+	setConnectionStatus(connectionStatus: string) {
+		this.connectionStatus.innerHTML = `FileShare: ${connectionStatus}`;
+	}
+
 	initializeWebSocket() {
 		this.ws = new WebSocket(this.settings.socketUrl);
-	  
+
 		this.ws.onopen = () => {
 			console.log("WebSocket connection opened");
+			this.setConnectionStatus("connected");
 			this.ws.send(
 				JSON.stringify({
 					type: "login",
-					name: this.settings.uniqueHash || "",
+					name: this.settings.publicKey || "",
 				})
 			);
 		};
@@ -97,31 +108,31 @@ class FileSharePlugin extends Plugin {
 			const data = JSON.parse(message.data);
 			switch (data.type) {
 				case "file":
-					this.receiveFile(data);
+					if (this.settings.autoAcceptFiles) {
+						this.receiveFile(data);
+					} else {
+						new AcceptFileModal(this.app, data.filename, () =>
+							this.receiveFile(data)
+						).open();
+					}
 					break;
 			}
 		};
-	  
+
 		this.ws.onclose = () => {
-		  console.log('WebSocket connection closed');
-		  new Notice('WebSocket connection closed. You may need to reconnect.');
+			console.log("WebSocket connection closed");
+			this.setConnectionStatus("disconnected");
+			new Notice("FileShare connection closed.");
 		};
-	  
+
 		this.ws.onerror = (error) => {
-		  console.error('WebSocket error:', error);
-		  new Notice('WebSocket error occurred. Check console for details.');
+			console.error("WebSocket error:", error);
+			new Notice("WebSocket error occurred. Check console for details.");
 		};
-	  }
+	}
 
 	onunload() {
 		this.ws.close();
-	}
-
-	generateUniqueHash() {
-		const systemInfo = `${
-			navigator.userAgent
-		}-${Date.now()}-${Math.random()}`;
-		return crypto.createHash("sha256").update(systemInfo).digest("hex");
 	}
 
 	async loadSettings() {
@@ -136,29 +147,42 @@ class FileSharePlugin extends Plugin {
 		await this.saveData(this.settings);
 	}
 
-	async receiveFile(data: {type: string, filename: string, file: string, aesKey: string, iv: string, name: string}) {
+	async receiveFile(data: {
+		type: string;
+		filename: string;
+		file: string;
+		aesKey: string;
+		iv: string;
+		name: string;
+	}) {
 		const receiveFolder = this.settings.receiveFolder;
 		const filePath = `${receiveFolder}/${data.filename}`;
-	
-		const encryptedFile = Buffer.from(data.file, 'base64');
-		const encryptedAesKey = Buffer.from(data.aesKey, 'base64');
-		const iv = Buffer.from(data.iv, 'base64');
-	
+
+		const encryptedFile = Buffer.from(data.file, "base64");
+		const encryptedAesKey = Buffer.from(data.aesKey, "base64");
+		const iv = Buffer.from(data.iv, "base64");
+
 		// Decrypt the AES key using the receiver's private key (RSA)
-		const aesKey = crypto.privateDecrypt(crypto.createPrivateKey(this.settings.privateKey), encryptedAesKey);
-	
+		const aesKey = crypto.privateDecrypt(
+			crypto.createPrivateKey(this.settings.privateKey),
+			encryptedAesKey
+		);
+
 		// Decrypt the file using AES-256
-		const decipher = crypto.createDecipheriv('aes-256-cbc', aesKey, iv);
-		const decryptedFile = Buffer.concat([decipher.update(encryptedFile), decipher.final()]);
-	
+		const decipher = crypto.createDecipheriv("aes-256-cbc", aesKey, iv);
+		const decryptedFile = Buffer.concat([
+			decipher.update(encryptedFile),
+			decipher.final(),
+		]);
+
 		try {
-		  await this.app.vault.createBinary(filePath, decryptedFile);
-		  new Notice(`File received and saved to ${filePath}`);
+			await this.app.vault.createBinary(filePath, decryptedFile);
+			new Notice(`File received and saved to ${filePath}`);
 		} catch (error) {
-		  console.error('Error saving received file:', error);
-		  new Notice('Failed to save the received file.');
+			console.error("Error saving received file:", error);
+			new Notice("Failed to save the received file.");
 		}
-	  }
+	}
 
 	onFileMenu(menu: Menu, file: TAbstractFile) {
 		if (file instanceof TFile) {
@@ -193,44 +217,12 @@ class FileShareSettingTab extends PluginSettingTab {
 
 		containerEl.createEl("h2", { text: "File Share Settings" });
 
-		// Unique Hash Setting
-		new Setting(containerEl)
-			.setName("Unique Hash")
-			.setDesc("Give this to a friend")
-			.addText((text) =>
-				text.setValue(this.plugin.settings.uniqueHash).setDisabled(true)
-			)
-			.addExtraButton((button) =>
-				button
-					.setIcon("copy")
-					.setTooltip("Copy to clipboard")
-					.onClick(() => {
-						navigator.clipboard.writeText(
-							this.plugin.settings.uniqueHash
-						);
-						new Notice("Hash copied to clipboard");
-					})
-			)
-			.addExtraButton((button) =>
-				button
-					.setIcon("refresh-cw")
-					.setTooltip("Regenerate hash")
-					.onClick(async () => {
-						this.plugin.settings.uniqueHash =
-							this.plugin.generateUniqueHash();
-						await this.plugin.saveSettings();
-						this.display();
-						new Notice("Hash regenerated");
-					})
-		);
-		
 		// Display the user's public key
 		new Setting(containerEl)
-			.setName('Your Public Key')
-			.setDesc('This is your public key. Share it with your friends.')
-			.addTextArea(text => {
-				text.setValue(this.plugin.settings.publicKey)
-					.setDisabled(true);
+			.setName("Your Key")
+			.setDesc("This is your key. Share it with your friends.")
+			.addText((text) => {
+				text.setValue(this.plugin.settings.publicKey).setDisabled(true);
 			})
 			.addExtraButton((button) =>
 				button
@@ -240,7 +232,7 @@ class FileShareSettingTab extends PluginSettingTab {
 						navigator.clipboard.writeText(
 							this.plugin.settings.publicKey
 						);
-						new Notice("Public Key copied to clipboard");
+						new Notice("Key copied to clipboard");
 					})
 			);
 
@@ -263,8 +255,22 @@ class FileShareSettingTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
+			.setName("Auto-accept incoming files")
+			.setDesc(
+				"Enable to automatically accept incoming files. Attention: There is a potential security risk to do that."
+			)
+			.addToggle((toggle) => {
+				toggle
+					.setValue(this.plugin.settings.autoAcceptFiles)
+					.onChange(async (value) => {
+						this.plugin.settings.autoAcceptFiles = value;
+						await this.plugin.saveSettings();
+					});
+			});
+
+		new Setting(containerEl)
 			.setName("Socket URL")
-			.setDesc("Socket URL to exchange sdp data automatically")
+			.setDesc("Socket URL to exchange files end-to-end encrypted")
 			.addText((text) =>
 				text
 					.setPlaceholder("")
@@ -282,8 +288,7 @@ class FileShareSettingTab extends PluginSettingTab {
 			);
 		this.plugin.settings.friends.forEach((friend, index) => {
 			const setting = new Setting(containerEl)
-				.setName(friend.username)
-				.setDesc(`Hash: ${friend.hash}`)
+				.setName(`Username: ${friend.username}`)
 				.addButton((button) =>
 					button
 						.setButtonText("Edit")
@@ -314,9 +319,8 @@ class FriendModal extends Modal {
 	plugin: FileSharePlugin;
 	index: number | null;
 	usernameInput: HTMLInputElement;
-	hashInput: HTMLInputElement;
 	fileShareSettingTab: FileShareSettingTab;
-	publicKeyTextArea: HTMLTextAreaElement;
+	publicKeyInput: HTMLInputElement;
 
 	constructor(
 		app: App,
@@ -333,40 +337,54 @@ class FriendModal extends Modal {
 	onOpen() {
 		const { contentEl } = this;
 		contentEl.empty();
+		contentEl.classList.add("setting-tab-modal"); // Add a class for styling
+
 		contentEl.createEl("h2", {
 			text: this.index === null ? "Add Friend" : "Edit Friend",
 		});
 
-		this.usernameInput = contentEl.createEl("input", { type: "text" });
-		this.hashInput = contentEl.createEl("input", { type: "text" });
-		this.publicKeyTextArea = contentEl.createEl('textarea', { type: 'text' });
+		const form = contentEl.createEl("div", { cls: "form-group" });
+
+		const usernameDiv = form.createEl("div", { cls: "setting-item" });
+		usernameDiv.createEl("label", { text: "Username" });
+		this.usernameInput = usernameDiv.createEl("input", {
+			type: "text",
+			cls: "input",
+		});
+
+		const publicKeyDiv = form.createEl("div", { cls: "setting-item" });
+		publicKeyDiv.createEl("label", { text: "Key" });
+		this.publicKeyInput = publicKeyDiv.createEl("input", {
+			type: "text",
+			cls: "input",
+		});
 
 		if (this.index !== null) {
 			const friend = this.plugin.settings.friends[this.index];
 			this.usernameInput.value = friend.username;
-			this.hashInput.value = friend.hash;
-			this.publicKeyTextArea.value = friend.publicKey;
+			this.publicKeyInput.value = friend.publicKey;
 		}
 
-		const saveButton = contentEl.createEl("button", { text: "Save" });
+		const saveButton = contentEl.createEl("button", {
+			text: "Save",
+			cls: "mod-cta",
+		});
 		saveButton.addEventListener("click", () => this.saveFriend());
 	}
 
 	saveFriend() {
 		const username = this.usernameInput.value;
-		const hash = this.hashInput.value;
-		const publicKey = this.publicKeyTextArea.value;
+		const publicKey = this.publicKeyInput.value;
 
 		if (this.index === null) {
-			this.plugin.settings.friends.push({ username, hash, publicKey });
+			this.plugin.settings.friends.push({ username, publicKey });
 		} else {
-			this.plugin.settings.friends[this.index] = { username, hash, publicKey };
+			this.plugin.settings.friends[this.index] = { username, publicKey };
 		}
 
 		this.plugin.saveSettings();
 		this.close();
 		this.fileShareSettingTab.display();
-
 	}
 }
 
