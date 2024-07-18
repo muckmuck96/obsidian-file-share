@@ -1,5 +1,6 @@
 import { Modal, Notice, TFile } from "obsidian";
 import * as crypto from "crypto";
+import FileSharePlugin from "main";
 
 interface Friend {
 	username: string;
@@ -7,6 +8,7 @@ interface Friend {
 }
 
 class FileShareModal extends Modal {
+	private plugin: FileSharePlugin;
 	private ws: WebSocket;
 	private file: TFile | null;
 	private friends: Friend[];
@@ -14,12 +16,13 @@ class FileShareModal extends Modal {
 	private listEl: HTMLElement;
 
 	constructor(
-		app: any,
+		plugin: FileSharePlugin,
 		ws: WebSocket,
 		friends: Friend[],
 		file: TFile | null = null
 	) {
-		super(app);
+		super(plugin.app);
+		this.plugin = plugin;
 		this.ws = ws;
 		this.file = file;
 		this.friends = friends;
@@ -90,8 +93,19 @@ class FileShareModal extends Modal {
 		};
 	}
 
-	serializePublicKey(publicKey: string) {
-		return Buffer.from(publicKey, "base64").toString();
+	async signFile() {
+		if (!this.file) {
+			new Notice("No file selected");
+			return;
+		}
+
+		const file = this.file;
+		const fileContent = await this.app.vault.readBinary(file);
+
+		const sign = crypto.createSign("SHA256");
+		sign.update(Buffer.from(fileContent));
+		const signature = sign.sign(this.plugin.settings.privateKey, "base64");
+		return signature;
 	}
 
 	async encryptAndSendFile(friend: Friend) {
@@ -100,7 +114,8 @@ class FileShareModal extends Modal {
 			return;
 		}
 
-		const publicKey = this.serializePublicKey(friend.publicKey);
+		const signature = await this.signFile();
+		const publicKey = this.plugin.serializePublicKey(friend.publicKey);
 		const file = this.file;
 		const fileContent = await this.app.vault.readBinary(file);
 
@@ -122,6 +137,8 @@ class FileShareModal extends Modal {
 			aesKey: encryptedAesKey.toString("base64"),
 			iv: iv.toString("base64"),
 			filename: file.name,
+			signature,
+			sender: this.plugin.settings.publicKey
 		};
 
 		this.ws.send(

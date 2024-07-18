@@ -86,6 +86,10 @@ class FileSharePlugin extends Plugin {
 		this.addSettingTab(new FileShareSettingTab(this.app, this));
 	}
 
+	serializePublicKey(publicKey: string) {
+		return Buffer.from(publicKey, "base64").toString();
+	}
+
 	setConnectionStatus(connectionStatus: string) {
 		this.connectionStatus.innerHTML = `FileShare: ${connectionStatus}`;
 	}
@@ -95,6 +99,7 @@ class FileSharePlugin extends Plugin {
 
 		this.ws.onopen = () => {
 			console.log("WebSocket connection opened");
+			new Notice("FileShare connection opened.");
 			this.setConnectionStatus("connected");
 			this.ws.send(
 				JSON.stringify({
@@ -147,6 +152,17 @@ class FileSharePlugin extends Plugin {
 		await this.saveData(this.settings);
 	}
 
+	async verifySignature(decryptedFile: Buffer, receivedSignature: string, publicKey: string) {
+		const verify = crypto.createVerify("SHA256");
+		verify.update(decryptedFile);
+		const verified = verify.verify(
+			crypto.createPublicKey(publicKey),
+			receivedSignature,
+			"base64"
+		);
+		return verified;
+	}
+
 	async receiveFile(data: {
 		type: string;
 		filename: string;
@@ -154,7 +170,13 @@ class FileSharePlugin extends Plugin {
 		aesKey: string;
 		iv: string;
 		name: string;
+		signature: string;
+		sender: string;
 	}) {
+		if(!data.sender) {
+			new Notice("Sender not found");
+			return;
+		}
 		const receiveFolder = this.settings.receiveFolder;
 		const filePath = `${receiveFolder}/${data.filename}`;
 
@@ -175,6 +197,18 @@ class FileSharePlugin extends Plugin {
 			decipher.final(),
 		]);
 
+		// Verify the signature
+		const isVerified = await this.verifySignature(
+			decryptedFile,
+			data.signature,
+			this.serializePublicKey(data.sender)
+		);
+
+		if (!isVerified) {
+			new Notice("Signature verification failed. File not saved.");
+			return;
+		}
+
 		try {
 			await this.app.vault.createBinary(filePath, decryptedFile);
 			new Notice(`File received and saved to ${filePath}`);
@@ -191,7 +225,7 @@ class FileSharePlugin extends Plugin {
 					.setIcon("paper-plane")
 					.onClick(() => {
 						new FileShareModal(
-							this.app,
+							this,
 							this.ws,
 							this.settings.friends,
 							file
@@ -233,6 +267,31 @@ class FileShareSettingTab extends PluginSettingTab {
 							this.plugin.settings.publicKey
 						);
 						new Notice("Key copied to clipboard");
+					})
+			)
+			.addExtraButton((button) =>
+				button
+					.setIcon("reset")
+					.setTooltip("Generate new key pair")
+					.onClick(async () => {
+						// open a confirmation dialog
+						const confirmation = confirm(
+							"Are you sure you want to generate a new key pair? Your current key will be lost."
+						);
+						if (confirmation) {
+							const { privateKey, publicKey } = crypto.generateKeyPairSync(
+								"rsa",
+								{
+									modulusLength: 2048,
+								}
+							);
+							this.plugin.settings.privateKey = privateKey
+								.export({ type: "pkcs1", format: "pem" })
+								.toString();
+							this.plugin.settings.publicKey = this.plugin.serializePublicKey(publicKey.export({ type: "pkcs1", format: "pem" }).toString());
+							await this.plugin.saveSettings();
+							this.display();
+						}
 					})
 			);
 
