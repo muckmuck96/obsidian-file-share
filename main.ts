@@ -111,16 +111,18 @@ class FileSharePlugin extends Plugin {
 
 		this.ws.onmessage = (message) => {
 			const data = JSON.parse(message.data);
-			switch (data.type) {
-				case "file":
-					if (this.settings.autoAcceptFiles) {
-						this.receiveFile(data);
-					} else {
-						new AcceptFileModal(this.app, data.filename, () =>
-							this.receiveFile(data)
-						).open();
-					}
-					break;
+			if(this.settings.friends.some(friend => friend.publicKey === data.sender)) {
+				switch (data.type) {
+					case "file":
+						if (this.settings.autoAcceptFiles) {
+							this.receiveFile(data);
+						} else {
+							new AcceptFileModal(this.app, data.filename, () =>
+								this.receiveFile(data)
+							).open();
+						}
+						break;
+				}
 			}
 		};
 
