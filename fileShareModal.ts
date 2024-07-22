@@ -85,9 +85,24 @@ class FileShareModal extends Modal {
 				data.target === friend.publicKey
 			) {
 				if (data.online) {
-					this.encryptAndSendFile(friend);
+					const requestData = JSON.stringify({ type: 'request', target: friend.publicKey, filename: this.file?.name });
+					const dataSign = this.signData(requestData);
+					this.ws.send(JSON.stringify({
+						type: 'request',
+						target: friend.publicKey,
+						filename: this.file?.name,
+						signature: dataSign
+					}));
+					new Notice(`Request sent to ${friend.username} for file ${this.file?.name}`);
 				} else {
 					new Notice(`${friend.username} is offline at the moment`);
+				}
+			} else if (data.type === "response") {
+				if (data.accepted) {
+					new Notice(`File request accepted by ${friend.username}`);
+					this.encryptAndSendFile(friend, data.hash);
+				} else {
+					new Notice(`File request declined by ${friend.username}`);
 				}
 			}
 		};
@@ -108,7 +123,13 @@ class FileShareModal extends Modal {
 		return signature;
 	}
 
-	async encryptAndSendFile(friend: Friend) {
+	signData(data: string): string {
+		const sign = crypto.createHmac('SHA256', this.plugin.settings.privateKey); 
+		sign.update(data);
+		return sign.digest('base64');
+	}
+
+	async encryptAndSendFile(friend: Friend, hash: string) {
 		if (!this.file) {
 			new Notice("No file selected");
 			return;
@@ -146,6 +167,7 @@ class FileShareModal extends Modal {
 				type: "file",
 				payload: payload,
 				target: friend.publicKey,
+				hash: hash
 			})
 		);
 

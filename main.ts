@@ -13,7 +13,6 @@ import {
 } from "obsidian";
 import { FileShareModal } from "./fileShareModal";
 import * as crypto from "crypto";
-import AcceptFileModal from "acceptFileModal";
 
 interface Friend {
 	username: string;
@@ -21,6 +20,7 @@ interface Friend {
 }
 
 interface P2PFileShareSettings {
+	useCustomSocketUrl: boolean;
 	socketUrl: string;
 	friends: Friend[];
 	receiveFolder: string;
@@ -30,6 +30,7 @@ interface P2PFileShareSettings {
 }
 
 const DEFAULT_SETTINGS: P2PFileShareSettings = {
+	useCustomSocketUrl: false,
 	socketUrl: "wss://ws-fileshare.asss.ist",
 	friends: [],
 	receiveFolder: "/",
@@ -111,17 +112,23 @@ class FileSharePlugin extends Plugin {
 
 		this.ws.onmessage = (message) => {
 			const data = JSON.parse(message.data);
-			if(this.settings.friends.some(friend => friend.publicKey === data.sender)) {
-				switch (data.type) {
-					case "file":
-						if (this.settings.autoAcceptFiles) {
-							this.receiveFile(data);
-						} else {
-							new AcceptFileModal(this.app, data.filename, () =>
-								this.receiveFile(data)
-							).open();
-						}
-						break;
+			if (data.sender && this.settings.friends.some(friend => friend.publicKey === data.sender)) {
+				const sender = this.settings.friends.find(friend => friend.publicKey == data.sender);
+				if (data.type == "file") {
+					const expectedHash = this.generateHash(data);
+					if (data.hash === expectedHash) {
+						this.receiveFile(data)
+					}
+				} else if (data.type == "request") {
+					const accept = this.settings.autoAcceptFiles || confirm(`${sender?.username} want to sent you: ${data.filename}. Accept it?`);
+					const hash = accept ? this.generateHash(data) : '';
+					this.ws.send(JSON.stringify({
+						type: 'response',
+						target: data.sender,
+						accepted: accept,
+						filename: data.filename,
+						hash: hash
+					}));
 				}
 			}
 		};
@@ -138,8 +145,18 @@ class FileSharePlugin extends Plugin {
 		};
 	}
 
+	generateHash(data: {filename: string, from: string}): string {
+		const hmac = crypto.createHmac('sha256', this.settings.privateKey); // Use the receiver's private key as the secret
+		hmac.update(data.filename + data.from);
+		return hmac.digest('base64');
+	}
+
 	onunload() {
 		this.ws.close();
+	}
+
+	getDefaultSettings() {
+		return DEFAULT_SETTINGS;
 	}
 
 	async loadSettings() {
@@ -332,10 +349,23 @@ class FileShareSettingTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Socket URL")
 			.setDesc("Socket URL to exchange files end-to-end encrypted")
+			.addToggle((toggle) => 
+				toggle
+					.setTooltip("Use custom")
+					.setValue(this.plugin.settings.useCustomSocketUrl)
+					.onChange(async (value) => {
+						if (!value) {
+							this.plugin.settings.socketUrl = this.plugin.getDefaultSettings().socketUrl;
+						}
+						this.plugin.settings.useCustomSocketUrl = value;
+						await this.plugin.saveSettings();
+						this.display();
+					}))
 			.addText((text) =>
 				text
 					.setPlaceholder("")
 					.setValue(this.plugin.settings.socketUrl)
+					.setDisabled(!this.plugin.settings.useCustomSocketUrl)
 					.onChange(async (value) => {
 						this.plugin.settings.socketUrl = value;
 						await this.plugin.saveSettings();
