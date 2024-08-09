@@ -1,7 +1,6 @@
 import { IFileShareSettings } from "interfaces/IFileShareSettings";
 import FileSharePlugin from "main";
 import { App, Notice, PluginSettingTab, Setting, TFolder } from "obsidian";
-import * as crypto from "crypto";
 import { FriendModal } from "modals/FriendModal";
 
 export const DEFAULT_SETTINGS: IFileShareSettings = {
