@@ -25,4 +25,4 @@ For more details, check out our socket server repository: [obsidian-file-share-s
 
 To use a custom socket server, simply click the toggle and paste your own socket server url. Ensure that you use the correct syntax/protocol: `wss://`.
 
-![customSocketURL](customSocketURL.png)
+![customSocketURL](/customSocketURL.png)

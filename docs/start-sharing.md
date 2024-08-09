@@ -11,9 +11,9 @@ Before you can share files with a friend, you must add them to your friend list.
 3. Once you receive your friend's key, copy it.
 4. Add your friend to your friend list:
    - Go to the File Share settings tab and click `Add`.
-   ![add-friend](addFriend.png)
+   ![add-friend](/addFriend.png)
    - Enter an `username` and paste your friend's `key` from step 3, then click `Save`.
-   ![add-friend-detailed](addFriendDetailed.png)
+   ![add-friend-detailed](/addFriendDetailed.png)
 6. Your friend is now added to your friend list. You can update the username and key by clicking `Edit`. To remove the friend from your list, click `Delete`. **Note: Removing a friend will prevent both you and your friend from exchanging files!**
 :::
 
@@ -21,7 +21,7 @@ Before you can share files with a friend, you must add them to your friend list.
 
 Make sure you are connected to the server. You can view the current connection status in the status bar.
 
-![statusBarConnected](statusBarConnected.png)
+![statusBarConnected](/statusBarConnected.png)
 
 To connect or disconnect from the configured server, use the reload icon in the left sidebar labeled `Toggle connection`.
 
@@ -31,12 +31,12 @@ Once you have at least one friend in your friend list (and they have added you t
 
 1. **Select a File:** Right-click on the specific file you wish to share and choose the `Send to ...` option.
    ::: details Screenshot
-   ![sendToContextMenu](sendToContextMenu.png)
+   ![sendToContextMenu](/sendToContextMenu.png)
    :::
 
 2. **Choose a Friend:** A modal will open, displaying all your friends. Select the friend you want to send the file to.
    ::: details Screenshot
-   ![sendToFriendList](sendToFriendList.png)
+   ![sendToFriendList](/sendToFriendList.png)
    :::
 
 3. **Check Notifications:** You should receive a response notification. Here’s what each response means:

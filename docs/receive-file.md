@@ -4,7 +4,7 @@ If you have enabled the `Auto-accept incoming files` option (which is not recomm
 
 However, if the above option is not enabled, you will receive a popup notification when someone wants to send you a file. You will need to either accept or decline the request. The popup will display the name of the friend who wants to send you the file, along with the filename.
 
-![fileSendRequest](fileSendRequest.png)
+![fileSendRequest](/fileSendRequest.png)
 
 The file itself is not sent until you give your approval. If you decline, the file transfer will be blocked by your client. Once you approve, the file will automatically be placed in the configured `Receive folder`, and you will receive a notification.
 

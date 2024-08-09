@@ -11,4 +11,4 @@
 2. Download the `main.js`, `styles.css` and `manifest.json` from the [latest release]() and put them into the created directory.
 3. Reload the installed plugin list with the corresponding icon and enable this plugin by using the toggle
 
-![file-share-plugin-list-preview](fileSharePluginList.png)
+![file-share-plugin-list-preview](/fileSharePluginList.png)
