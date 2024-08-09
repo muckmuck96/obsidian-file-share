@@ -4,13 +4,13 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: "Obsidian Secured File Sharing",
   description: "An obsidian plugin to share files end-to-end encrypted between several vaults.",
+  lang: "en-US",
+  base: '/obsidian-file-share/',
   themeConfig: {
-    // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Enhanced settings', link: '/enhanced-settings' }
     ],
-
     sidebar: [
       {
         text: 'Getting started',
@@ -30,7 +30,7 @@ export default defineConfig({
         ]
       },
       {
-        text: 'Other',
+        text: '',
         items: [
           { text: 'Help', link: '/help' },
           { text: 'Roadmap', link: '/roadmap' },
@@ -42,8 +42,10 @@ export default defineConfig({
 
     socialLinks: [
       { icon: 'github', link: 'https://github.com/muckmuck96/obsidian-file-share' }
-    ]
-  },
+    ],
 
-  base: '/obsidian-file-share/',
+    editLink: {
+			pattern: "https://github.com/muckmuck96/obsidian-file-share/edit/master/docs/:path",
+		},
+  },
 })

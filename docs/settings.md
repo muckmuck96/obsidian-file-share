@@ -5,13 +5,13 @@ Explore a comprehensive list of all available settings, complete with detailed e
 ## General settings
 
 ::: details Screenshot
-![file-share-settings-screenshot](fileShareSettings.png)
+![file-share-settings-screenshot](/fileShareSettings.png)
 :::
 
 ### Your key
-Upon enabling the plugin for the first time, a unique key will be automatically generated for you. You can easily copy this key by clicking the copy icon (![copy-icon](copyIcon.png)).
+Upon enabling the plugin for the first time, a unique key will be automatically generated for you. You can easily copy this key by clicking the copy icon (![copy-icon](/copyIcon.png)).
 
-If you wish to reset your key, simply click the reset icon (![reset-icon](resetIcon.png)). However, please note that doing so will invalidate your old key, meaning you will no longer be able to send or receive files with anyone who has your previous key. To continue sharing files, you'll need to provide your new key to your [configured friends](start-sharing.md).
+If you wish to reset your key, simply click the reset icon (![reset-icon](/resetIcon.png)). However, please note that doing so will invalidate your old key, meaning you will no longer be able to send or receive files with anyone who has your previous key. To continue sharing files, you'll need to provide your new key to your [configured friends](start-sharing.md).
 
 Default: `your generated key`
 
