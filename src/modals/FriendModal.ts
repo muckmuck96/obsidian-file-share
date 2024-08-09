@@ -21,7 +21,7 @@ export class FriendModal extends Modal {
 		this.fileShareSettingTab = fileShareSettingTab;
 	}
 
-	onOpen() {
+	onOpen(): void {
 		const { contentEl } = this;
 		contentEl.empty();
 		contentEl.classList.add("setting-tab-modal"); 
@@ -59,7 +59,7 @@ export class FriendModal extends Modal {
 		saveButton.addEventListener("click", () => this.saveFriend());
 	}
 
-	saveFriend() {
+	saveFriend(): void {
 		const username = this.usernameInput.value;
 		const publicKey = this.publicKeyInput.value;
 

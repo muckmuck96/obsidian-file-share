@@ -10,26 +10,26 @@ export class Socket {
 		this.setConnectionStatus("disconnected");
     }
 
-    close() {
+    close(): void {
         this.ws.close();
     }
 
-    send(type: string, data: unknown) {
+    send(type: string, data: unknown): void {
         const payload = Object.assign({ type }, data);
         this.ws.send(
 			JSON.stringify(payload)
 		);
     }
 
-    getWS() {
+    getWS(): WebSocket {
         return this.ws;
     }
 
-	setConnectionStatus(connectionStatus: string) {
-		this.plugin.connectionStatus.innerHTML = `FileShare: ${connectionStatus}`;
+	setConnectionStatus(connectionStatus: string): void {
+		this.plugin.connectionStatus.innerText = `FileShare: ${connectionStatus}`;
 	}
 
-    toggleConnection() {
+    toggleConnection(): void {
         if (this.ws.readyState === WebSocket.OPEN) {
             this.ws.close();
             new Notice("Closing connection...");
@@ -39,7 +39,7 @@ export class Socket {
         }
     }
 
-    init() {
+    init(): void {
 		this.ws = new WebSocket(this.plugin.settings.socketUrl);
 
 		this.ws.onopen = () => {

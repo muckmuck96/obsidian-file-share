@@ -1,5 +1,7 @@
 import * as crypto from "crypto";
+import { IEncryptedFilePayload } from "interfaces/IEncryptedFilePayload";
 import { IFriend } from "interfaces/IFriend";
+import { IKeyPairPayload } from "interfaces/IKeyPairPayload";
 import FileSharePlugin from "main";
 import { Notice, TFile } from "obsidian";
 
@@ -10,7 +12,7 @@ export class Secure {
 		this.plugin = plugin;
 	}
 
-	async generateKeyPair() {
+	async generateKeyPair(): Promise<IKeyPairPayload> {
 		const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
 			modulusLength: 2048,
 		});
@@ -24,7 +26,7 @@ export class Secure {
 		};
     }
 
-	serializePublicKey(publicKey: string) {
+	serializePublicKey(publicKey: string): string {
 		return Buffer.from(publicKey, "base64").toString();
 	}
 
@@ -32,7 +34,7 @@ export class Secure {
 		decryptedFile: Buffer,
 		receivedSignature: string,
 		publicKey: string
-	) {
+	): Promise<boolean> {
 		const verify = crypto.createVerify("SHA256");
 		verify.update(decryptedFile);
 		const verified = verify.verify(
@@ -47,7 +49,7 @@ export class Secure {
 		encryptedAesKey: NodeJS.ArrayBufferView,
 		iv: Buffer,
 		encryptedFile: NodeJS.ArrayBufferView
-	) {
+	): Promise<Buffer> {
 		const aesKey = crypto.privateDecrypt(
 			crypto.createPrivateKey(this.plugin.settings.privateKey),
 			encryptedAesKey
@@ -69,10 +71,10 @@ export class Secure {
     
     
 
-	async signFile(file: TFile) {
+	async signFile(file: TFile): Promise<string | null> {
 		if (!file) {
 			new Notice("No file selected");
-			return;
+			return null;
         }
         
 		const fileContent = await this.plugin.app.vault.readBinary(file);
@@ -89,10 +91,10 @@ export class Secure {
 		return sign.digest('base64');
 	}
 
-	async encryptFile(file: TFile, friend: IFriend) {
+	async encryptFile(file: TFile, friend: IFriend): Promise<IEncryptedFilePayload | null> {
 		if (!file) {
 			new Notice("No file selected");
-			return;
+			return null;
 		}
 
 		const signature = await this.signFile(file);

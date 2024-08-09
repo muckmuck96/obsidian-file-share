@@ -8,7 +8,7 @@ export class FileTransmitter {
     constructor(plugin: FileSharePlugin) {
         this.plugin = plugin;
     }
-	async sendFile(file: TFile | null, friend: IFriend, hash: string) {
+	async sendFile(file: TFile | null, friend: IFriend, hash: string): Promise<void> {
 		if (!file) {
 			new Notice("No file selected");
 			return;
@@ -34,7 +34,7 @@ export class FileTransmitter {
 		name: string;
 		signature: string;
 		sender: string;
-	}) {
+	}): Promise<void> {
 		if(!data.sender) {
 			new Notice("Sender not found");
 			return;

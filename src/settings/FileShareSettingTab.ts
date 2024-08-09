@@ -53,21 +53,13 @@ export class FileShareSettingTab extends PluginSettingTab {
 					.setIcon("reset")
 					.setTooltip("Generate new key pair")
 					.onClick(async () => {
-						// open a confirmation dialog
 						const confirmation = confirm(
 							"Are you sure you want to generate a new key pair? Your current key will be lost."
 						);
 						if (confirmation) {
-							const { privateKey, publicKey } = crypto.generateKeyPairSync(
-								"rsa",
-								{
-									modulusLength: 2048,
-								}
-							);
-							this.plugin.settings.privateKey = privateKey
-								.export({ type: "pkcs1", format: "pem" })
-								.toString();
-							this.plugin.settings.publicKey = this.plugin.secure.serializePublicKey(publicKey.export({ type: "pkcs1", format: "pem" }).toString());
+							const { privateKey, publicKey } = await this.plugin.secure.generateKeyPair();
+							this.plugin.settings.privateKey = privateKey;
+							this.plugin.settings.publicKey = publicKey;
 							await this.plugin.saveSettings();
 							this.display();
 						}
@@ -155,12 +147,12 @@ export class FileShareSettingTab extends PluginSettingTab {
 		});
 	}
 
-	addFriend() {
+	addFriend(): void {
 		const modal = new FriendModal(this.app, this.plugin, null, this);
 		modal.open();
 	}
 
-	editFriend(index: number) {
+	editFriend(index: number): void {
 		const modal = new FriendModal(this.app, this.plugin, index, this);
 		modal.open();
 	}

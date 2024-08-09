@@ -24,7 +24,7 @@ class FileShareModal extends Modal {
 		this.friends = friends;
 	}
 
-	onOpen() {
+	onOpen(): void {
 		const { contentEl } = this;
 		contentEl.empty();
 		contentEl.addClass("file-share-modal");
@@ -40,7 +40,7 @@ class FileShareModal extends Modal {
 		this.updateList();
 	}
 
-	updateList() {
+	updateList(): void {
 		const query = this.inputEl.value.toLowerCase();
 		this.listEl.empty();
 
@@ -66,7 +66,7 @@ class FileShareModal extends Modal {
 		}
 	}
 
-	checkOnlineAndSendFile(friend: IFriend) {
+	checkOnlineAndSendFile(friend: IFriend): void {
 		this.socket.send("checkOnline", { target: friend.publicKey });
 
 		this.socket.getWS().onmessage = (message) => {

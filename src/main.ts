@@ -18,7 +18,7 @@ class FileSharePlugin extends Plugin {
 	secure: Secure;
 	fileTransmitter: FileTransmitter;
 
-	async onload() {
+	async onload(): Promise<void> {
 		await this.loadSettings();
 
 		this.secure = new Secure(this);
@@ -48,15 +48,15 @@ class FileSharePlugin extends Plugin {
 		this.addSettingTab(new FileShareSettingTab(this.app, this));
 	}
 
-	onunload() {
+	onunload(): void {
 		this.socket.close();
 	}
 
-	getDefaultSettings() {
+	getDefaultSettings(): IFileShareSettings {
 		return DEFAULT_SETTINGS;
 	}
 
-	async loadSettings() {
+	async loadSettings(): Promise<void> {
 		this.settings = Object.assign(
 			{},
 			DEFAULT_SETTINGS,
@@ -64,11 +64,11 @@ class FileSharePlugin extends Plugin {
 		);
 	}
 
-	async saveSettings() {
+	async saveSettings(): Promise<void> {
 		await this.saveData(this.settings);
 	}
 
-	onFileMenu(menu: Menu, file: TAbstractFile) {
+	onFileMenu(menu: Menu, file: TAbstractFile): void {
 		if (file instanceof TFile) {
 			menu.addItem((item) => {
 				item.setTitle("Send to ...")
