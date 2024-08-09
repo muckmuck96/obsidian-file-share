@@ -1,4 +1,4 @@
 export interface IKeyPairPayload {
-    privateKey: string,
-    publicKey: string
+	privateKey: string;
+	publicKey: string;
 }

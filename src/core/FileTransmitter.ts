@@ -3,23 +3,33 @@ import FileSharePlugin from "main";
 import { Notice, TFile } from "obsidian";
 
 export class FileTransmitter {
-    private plugin: FileSharePlugin;
+	private plugin: FileSharePlugin;
 
-    constructor(plugin: FileSharePlugin) {
-        this.plugin = plugin;
-    }
-	async sendFile(file: TFile | null, friend: IFriend, hash: string): Promise<void> {
+	constructor(plugin: FileSharePlugin) {
+		this.plugin = plugin;
+	}
+	async sendFile(
+		file: TFile | null,
+		friend: IFriend,
+		hash: string
+	): Promise<void> {
 		if (!file) {
 			new Notice("No file selected");
 			return;
 		}
-		const encryptedFilePayload = await this.plugin.secure.encryptFile(file, friend);
-		const payload = Object.assign({ sender: this.plugin.settings.publicKey }, encryptedFilePayload);
+		const encryptedFilePayload = await this.plugin.secure.encryptFile(
+			file,
+			friend
+		);
+		const payload = Object.assign(
+			{ sender: this.plugin.settings.publicKey },
+			encryptedFilePayload
+		);
 
 		this.plugin.socket.send("file", {
 			payload: payload,
 			target: friend.publicKey,
-			hash: hash
+			hash: hash,
 		});
 
 		new Notice(`File sent to ${friend.username}`);
@@ -35,7 +45,7 @@ export class FileTransmitter {
 		signature: string;
 		sender: string;
 	}): Promise<void> {
-		if(!data.sender) {
+		if (!data.sender) {
 			new Notice("Sender not found");
 			return;
 		}
@@ -46,7 +56,11 @@ export class FileTransmitter {
 		const encryptedAesKey = Buffer.from(data.aesKey, "base64");
 		const iv = Buffer.from(data.iv, "base64");
 
-		const decryptedFile = await this.plugin.secure.decryptFile(encryptedAesKey, iv, encryptedFile);
+		const decryptedFile = await this.plugin.secure.decryptFile(
+			encryptedAesKey,
+			iv,
+			encryptedFile
+		);
 
 		const isVerified = await this.plugin.secure.verifySignature(
 			decryptedFile,

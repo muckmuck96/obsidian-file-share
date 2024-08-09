@@ -1,11 +1,9 @@
-import {
-	Menu,
-	Plugin,
-	TAbstractFile,
-	TFile,
-} from "obsidian";
+import { Menu, Plugin, TAbstractFile, TFile } from "obsidian";
 import { FileShareModal } from "modals/FileShareModal";
-import { DEFAULT_SETTINGS, FileShareSettingTab } from "settings/FileShareSettingTab";
+import {
+	DEFAULT_SETTINGS,
+	FileShareSettingTab,
+} from "settings/FileShareSettingTab";
 import { IFileShareSettings } from "interfaces/IFileShareSettings";
 import { Secure } from "security/Secure";
 import { Socket } from "core/Socket";
@@ -24,7 +22,8 @@ class FileSharePlugin extends Plugin {
 		this.secure = new Secure(this);
 
 		if (!this.settings.privateKey || !this.settings.publicKey) {
-			const { privateKey, publicKey } = await this.secure.generateKeyPair()
+			const { privateKey, publicKey } =
+				await this.secure.generateKeyPair();
 			this.settings.privateKey = privateKey;
 			this.settings.publicKey = publicKey;
 			await this.saveSettings();
@@ -85,6 +84,5 @@ class FileSharePlugin extends Plugin {
 		}
 	}
 }
-
 
 export default FileSharePlugin;

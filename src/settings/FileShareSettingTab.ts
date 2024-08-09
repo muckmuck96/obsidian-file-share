@@ -4,7 +4,6 @@ import { App, Notice, PluginSettingTab, Setting, TFolder } from "obsidian";
 import * as crypto from "crypto";
 import { FriendModal } from "modals/FriendModal";
 
-
 export const DEFAULT_SETTINGS: IFileShareSettings = {
 	useCustomSocketUrl: false,
 	socketUrl: "wss://ws-fileshare.asss.ist",
@@ -57,7 +56,8 @@ export class FileShareSettingTab extends PluginSettingTab {
 							"Are you sure you want to generate a new key pair? Your current key will be lost."
 						);
 						if (confirmation) {
-							const { privateKey, publicKey } = await this.plugin.secure.generateKeyPair();
+							const { privateKey, publicKey } =
+								await this.plugin.secure.generateKeyPair();
 							this.plugin.settings.privateKey = privateKey;
 							this.plugin.settings.publicKey = publicKey;
 							await this.plugin.saveSettings();
@@ -101,18 +101,20 @@ export class FileShareSettingTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Socket URL")
 			.setDesc("Socket URL to exchange files end-to-end encrypted")
-			.addToggle((toggle) => 
+			.addToggle((toggle) =>
 				toggle
 					.setTooltip("Use custom")
 					.setValue(this.plugin.settings.useCustomSocketUrl)
 					.onChange(async (value) => {
 						if (!value) {
-							this.plugin.settings.socketUrl = this.plugin.getDefaultSettings().socketUrl;
+							this.plugin.settings.socketUrl =
+								this.plugin.getDefaultSettings().socketUrl;
 						}
 						this.plugin.settings.useCustomSocketUrl = value;
 						await this.plugin.saveSettings();
 						this.display();
-					}))
+					})
+			)
 			.addText((text) =>
 				text
 					.setPlaceholder("")

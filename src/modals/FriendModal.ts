@@ -1,5 +1,5 @@
 import FileSharePlugin from "main";
-import { App, Modal } from "obsidian";
+import { App, Modal, Notice } from "obsidian";
 import { FileShareSettingTab } from "settings/FileShareSettingTab";
 
 export class FriendModal extends Modal {
@@ -24,7 +24,7 @@ export class FriendModal extends Modal {
 	onOpen(): void {
 		const { contentEl } = this;
 		contentEl.empty();
-		contentEl.classList.add("setting-tab-modal"); 
+		contentEl.classList.add("setting-tab-modal");
 
 		contentEl.createEl("h2", {
 			text: this.index === null ? "Add Friend" : "Edit Friend",
@@ -62,6 +62,18 @@ export class FriendModal extends Modal {
 	saveFriend(): void {
 		const username = this.usernameInput.value;
 		const publicKey = this.publicKeyInput.value;
+
+		if (username === "" || publicKey === "") {
+			new Notice("Please fill out all fields.");
+			return;
+		} else if (
+			this.plugin.settings.friends
+				.filter((_, idx) => this.index == null || this.index != idx)
+				.some((friend) => friend.username === username)
+		) {
+			new Notice("A friend with this username is already set.");
+			return;
+		}
 
 		if (this.index === null) {
 			this.plugin.settings.friends.push({ username, publicKey });

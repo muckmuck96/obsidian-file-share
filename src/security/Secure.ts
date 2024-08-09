@@ -24,7 +24,7 @@ export class Secure {
 				publicKey.export({ type: "pkcs1", format: "pem" }).toString()
 			).toString("base64"),
 		};
-    }
+	}
 
 	serializePublicKey(publicKey: string): string {
 		return Buffer.from(publicKey, "base64").toString();
@@ -64,19 +64,20 @@ export class Secure {
 	}
 
 	generateHash(data: { filename: string; from: string }): string {
-		const hmac = crypto.createHmac("sha256", this.plugin.settings.privateKey); 
+		const hmac = crypto.createHmac(
+			"sha256",
+			this.plugin.settings.privateKey
+		);
 		hmac.update(`${data.filename}` + `${data.from}`);
 		return hmac.digest("base64");
-    }
-    
-    
+	}
 
 	async signFile(file: TFile): Promise<string | null> {
 		if (!file) {
 			new Notice("No file selected");
 			return null;
-        }
-        
+		}
+
 		const fileContent = await this.plugin.app.vault.readBinary(file);
 
 		const sign = crypto.createSign("SHA256");
@@ -86,19 +87,27 @@ export class Secure {
 	}
 
 	signData(data: string): string {
-		const sign = crypto.createHmac('SHA256', this.plugin.settings.privateKey); 
+		const sign = crypto.createHmac(
+			"SHA256",
+			this.plugin.settings.privateKey
+		);
 		sign.update(data);
-		return sign.digest('base64');
+		return sign.digest("base64");
 	}
 
-	async encryptFile(file: TFile, friend: IFriend): Promise<IEncryptedFilePayload | null> {
+	async encryptFile(
+		file: TFile,
+		friend: IFriend
+	): Promise<IEncryptedFilePayload | null> {
 		if (!file) {
 			new Notice("No file selected");
 			return null;
 		}
 
 		const signature = await this.signFile(file);
-		const publicKey = this.plugin.secure.serializePublicKey(friend.publicKey);
+		const publicKey = this.plugin.secure.serializePublicKey(
+			friend.publicKey
+		);
 		const fileContent = await this.plugin.app.vault.readBinary(file);
 
 		const aesKey = crypto.randomBytes(32); // AES-256 key
@@ -119,7 +128,7 @@ export class Secure {
 			aesKey: encryptedAesKey.toString("base64"),
 			iv: iv.toString("base64"),
 			filename: file.name,
-			signature
-        };
+			signature,
+		};
 	}
 }

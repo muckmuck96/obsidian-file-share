@@ -76,21 +76,31 @@ class FileShareModal extends Modal {
 				data.target === friend.publicKey
 			) {
 				if (data.online) {
-					const requestData = JSON.stringify({ type: 'request', target: friend.publicKey, filename: this.file?.name });
+					const requestData = JSON.stringify({
+						type: "request",
+						target: friend.publicKey,
+						filename: this.file?.name,
+					});
 					const dataSign = this.plugin.secure.signData(requestData);
 					this.socket.send("request", {
 						target: friend.publicKey,
 						filename: this.file?.name,
-						signature: dataSign
+						signature: dataSign,
 					});
-					new Notice(`Request sent to ${friend.username} for file ${this.file?.name}`);
+					new Notice(
+						`Request sent to ${friend.username} for file ${this.file?.name}`
+					);
 				} else {
 					new Notice(`${friend.username} is offline at the moment`);
 				}
 			} else if (data.type === "response") {
 				if (data.accepted) {
 					new Notice(`File request accepted by ${friend.username}`);
-					this.plugin.fileTransmitter.sendFile(this.file, friend, data.hash);
+					this.plugin.fileTransmitter.sendFile(
+						this.file,
+						friend,
+						data.hash
+					);
 				} else {
 					new Notice(`File request declined by ${friend.username}`);
 				}
