@@ -6,5 +6,5 @@
 	"description": "End-to-end encrypted file sharing between several vaults",
 	"author": "muckmuck",
 	"authorUrl": "https://github.com/muckmuck96",
-	"isDesktopOnly": false
+	"isDesktopOnly": true
 }
