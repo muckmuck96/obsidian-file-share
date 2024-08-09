@@ -1,5 +1,5 @@
 {
-  "name": "file-share-plugin",
+  "name": "file-share",
   "version": "1.0.0",
   "description": "End-to-End encrpyted file share for obsidian.md",
   "main": "main.js",

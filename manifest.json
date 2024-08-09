@@ -1,9 +1,9 @@
 {
-	"id": "file-share-plugin",
-	"name": "FileShare",
+	"id": "file-share",
+	"name": "File Share",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "End-to-end encrypted file sharing between several vaults",
+	"description": "Enables end-to-end encrypted file sharing directly between vaults via a socket server.",
 	"author": "muckmuck",
 	"authorUrl": "https://github.com/muckmuck96",
 	"isDesktopOnly": true
