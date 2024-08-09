@@ -24,7 +24,7 @@ export class FileShareSettingTab extends PluginSettingTab {
 	}
 
 	display(): void {
-		let { containerEl } = this;
+		const { containerEl } = this;
 
 		containerEl.empty();
 
@@ -138,7 +138,7 @@ export class FileShareSettingTab extends PluginSettingTab {
 				button.setButtonText("Add").onClick(() => this.addFriend())
 			);
 		this.plugin.settings.friends.forEach((friend, index) => {
-			const setting = new Setting(containerEl)
+			new Setting(containerEl)
 				.setName(`Username: ${friend.username}`)
 				.addButton((button) =>
 					button

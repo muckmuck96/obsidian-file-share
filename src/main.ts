@@ -1,7 +1,5 @@
-// main.ts
 import {
 	Menu,
-	Notice,
 	Plugin,
 	TAbstractFile,
 	TFile,
