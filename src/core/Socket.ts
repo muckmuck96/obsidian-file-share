@@ -43,7 +43,6 @@ export class Socket {
 		this.ws = new WebSocket(this.plugin.settings.socketUrl);
 
 		this.ws.onopen = () => {
-			console.log("WebSocket connection opened");
 			new Notice("FileShare connection opened.");
 			this.setConnectionStatus("connected");
 			this.ws.send(
@@ -59,7 +58,6 @@ export class Socket {
 			if (data.sender && this.plugin.settings.friends.some(friend => friend.publicKey === data.sender)) {
 				const sender = this.plugin.settings.friends.find(friend => friend.publicKey == data.sender);
                 if (data.type == "file") {
-                    console.log(data);
 					const expectedHash = this.plugin.secure.generateHash(data);
 					if (data.hash === expectedHash) {
 						this.plugin.fileTransmitter.receiveFile(data)
@@ -79,7 +77,6 @@ export class Socket {
 		};
 
 		this.ws.onclose = () => {
-			console.log("WebSocket connection closed");
 			this.setConnectionStatus("disconnected");
 			new Notice("FileShare connection closed.");
 		};
