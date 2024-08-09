@@ -3,7 +3,7 @@
 	"name": "FileShare",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "End-to-End encrpyted file share for obsidian.md",
+	"description": "End-to-end encrypted file sharing between several vaults",
 	"author": "muckmuck",
 	"authorUrl": "https://github.com/muckmuck96",
 	"isDesktopOnly": false
