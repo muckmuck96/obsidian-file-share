@@ -26,11 +26,14 @@ export class FileShareSettingTab extends PluginSettingTab {
 
 		containerEl.empty();
 
-		containerEl.createEl("h2", { text: "File Share Settings" });
+		const fragment = new DocumentFragment();
+		fragment.createEl("span").innerHTML = "File Share Settings > Read the <a href='https://muckmuck96.github.io/obsidian-file-share/'>documentation</a>";
+
+		new Setting(containerEl).setName(fragment).setHeading();
 
 		// Display the user's public key
 		new Setting(containerEl)
-			.setName("Your Key")
+			.setName("Your key")
 			.setDesc("This is your key. Share it with your friends.")
 			.addText((text) => {
 				text.setValue(this.plugin.settings.publicKey).setDisabled(true);
@@ -67,7 +70,7 @@ export class FileShareSettingTab extends PluginSettingTab {
 
 		// Folder Setting
 		new Setting(containerEl)
-			.setName("Receive Folder")
+			.setName("Receive folder")
 			.setDesc("Select the folder where received files will be saved.")
 			.addDropdown((drop) => {
 				const folders = this.plugin.app.vault
@@ -92,8 +95,13 @@ export class FileShareSettingTab extends PluginSettingTab {
 				toggle
 					.setValue(this.plugin.settings.autoAcceptFiles)
 					.onChange(async (value) => {
-						this.plugin.settings.autoAcceptFiles = value;
-						await this.plugin.saveSettings();
+						const confirmation = confirm(
+							"Are you sure you want to activate this option?."
+						);
+						if(confirmation) {
+							this.plugin.settings.autoAcceptFiles = value;
+							await this.plugin.saveSettings();
+						}
 					});
 			});
 
