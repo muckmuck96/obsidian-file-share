@@ -5,9 +5,7 @@ import { FileShareSettingTab } from "settings/FileShareSettingTab";
 export class FriendModal extends Modal {
 	plugin: FileSharePlugin;
 	index: number | null;
-	usernameInput: HTMLInputElement;
 	fileShareSettingTab: FileShareSettingTab;
-	publicKeyInput: HTMLInputElement;
 	username: string;
 	publicKey: string;
 
@@ -21,6 +19,8 @@ export class FriendModal extends Modal {
 		this.plugin = plugin;
 		this.index = index;
 		this.fileShareSettingTab = fileShareSettingTab;
+
+		this.loadModalForm();
 	}
 
 	onOpen(): void {
@@ -31,48 +31,35 @@ export class FriendModal extends Modal {
 			text: this.index === null ? "Add Friend" : "Edit Friend",
 		});
 
-		if (this.index !== null) {
-			const friend = this.plugin.settings.friends[this.index];
-			this.username = friend.username;
-			this.publicKey = friend.publicKey;
-		}
+		new Setting(contentEl).setName("Username").addText((text) => {
+			text.setValue(this.username);
+			text.onChange((value) => {
+				this.username = value;
+			});
+		});
 
-		new Setting(contentEl)
-			.setName('Username')
-			.addText((text) => {
-				text.setValue(this.username);
-				text.onChange((value) => {
-					this.username = value;
-				});
-			}
-		);
-		
-		new Setting(contentEl)
-			.setName('Key')
-			.addText((text) => {
-				text.setValue(this.publicKey);
-				text.onChange((value) => {
-					this.publicKey = value;
-				});
-			}
-		);
+		new Setting(contentEl).setName("Key").addText((text) => {
+			text.setValue(this.publicKey);
+			text.onChange((value) => {
+				this.publicKey = value;
+			});
+		});
 
-		new Setting(contentEl)
-			.addButton((btn) =>
-				btn
+		new Setting(contentEl).addButton((btn) =>
+			btn
 				.setButtonText("Save")
 				.setCta()
 				.onClick(() => {
-					this.close();
 					this.saveFriend();
-				}));
+				})
+		);
 	}
 
 	saveFriend(): void {
-		const username = this.usernameInput.value;
-		const publicKey = this.publicKeyInput.value;
+		const username = this.username;
+		const publicKey = this.publicKey;
 
-		if (username === "" || publicKey === "") {
+		if (username.length == 0 || publicKey.length == 0) {
 			new Notice("Please fill out all fields.");
 			return;
 		} else if (
@@ -93,5 +80,15 @@ export class FriendModal extends Modal {
 		this.plugin.saveSettings();
 		this.close();
 		this.fileShareSettingTab.display();
+	}
+
+	loadModalForm() {
+		this.username = "";
+		this.publicKey = "";
+		if (this.index !== null) {
+			const friend = this.plugin.settings.friends[this.index];
+			this.username = friend.username;
+			this.publicKey = friend.publicKey;
+		}
 	}
 }
