@@ -82,7 +82,7 @@ export class FriendModal extends Modal {
 		this.fileShareSettingTab.display();
 	}
 
-	loadModalForm() {
+	loadModalForm(): void {
 		this.username = "";
 		this.publicKey = "";
 		if (this.index !== null) {

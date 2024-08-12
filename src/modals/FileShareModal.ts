@@ -28,11 +28,11 @@ class FileShareModal extends SuggestModal<IFriend> {
 		);
 	}
 
-	renderSuggestion(friend: IFriend, el: HTMLElement) {
+	renderSuggestion(friend: IFriend, el: HTMLElement): void {
 		el.createEl("div", { text: friend.username });
 	}
 
-	onChooseSuggestion(friend: IFriend, evt: MouseEvent | KeyboardEvent) {
+	onChooseSuggestion(friend: IFriend, evt: MouseEvent | KeyboardEvent): void {
 		this.checkOnlineAndSendFile(friend);
 	}
 
