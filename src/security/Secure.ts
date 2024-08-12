@@ -131,4 +131,8 @@ export class Secure {
 			signature,
 		};
 	}
+
+	isSocketURLSecure(): boolean {
+		return this.plugin.settings.socketUrl.startsWith("wss://");
+	}
 }

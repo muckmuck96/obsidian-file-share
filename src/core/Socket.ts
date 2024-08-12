@@ -27,6 +27,16 @@ export class Socket {
 		this.plugin.connectionStatus.innerText = `FileShare: ${connectionStatus}`;
 	}
 
+	verifySocketURL(): void {
+		if (!this.plugin.secure.isSocketURLSecure()) {
+			new Notice(
+				"Socket URL could not be validated for SSL. Using default socket server..."
+			);
+			this.plugin.settings.socketUrl =
+				this.plugin.getDefaultSettings().socketUrl;
+		}
+	}
+
 	toggleConnection(): void {
 		if (this.ws.readyState === WebSocket.OPEN) {
 			this.ws.close();
@@ -38,6 +48,7 @@ export class Socket {
 	}
 
 	init(): void {
+		this.verifySocketURL();
 		this.ws = new WebSocket(this.plugin.settings.socketUrl);
 
 		this.ws.onopen = () => {

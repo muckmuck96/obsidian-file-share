@@ -27,7 +27,8 @@ export class FileShareSettingTab extends PluginSettingTab {
 		containerEl.empty();
 
 		const fragment = new DocumentFragment();
-		fragment.createEl("span").innerHTML = "File Share Settings > Read the <a href='https://muckmuck96.github.io/obsidian-file-share/'>documentation</a>";
+		fragment.createEl("span").innerHTML =
+			"File Share Settings > Read the <a href='https://muckmuck96.github.io/obsidian-file-share/'>documentation</a>";
 
 		new Setting(containerEl).setName(fragment).setHeading();
 
@@ -98,7 +99,7 @@ export class FileShareSettingTab extends PluginSettingTab {
 						const confirmation = confirm(
 							"Are you sure you want to activate this option?."
 						);
-						if(confirmation) {
+						if (confirmation) {
 							this.plugin.settings.autoAcceptFiles = value;
 							await this.plugin.saveSettings();
 						}
@@ -107,7 +108,9 @@ export class FileShareSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("Socket URL")
-			.setDesc("Socket URL to exchange files end-to-end encrypted")
+			.setDesc(
+				"Socket URL to exchange files end-to-end encrypted. Only SSL supported."
+			)
 			.addToggle((toggle) =>
 				toggle
 					.setTooltip("Use custom")
@@ -138,6 +141,7 @@ export class FileShareSettingTab extends PluginSettingTab {
 			.addButton((button) =>
 				button.setButtonText("Add").onClick(() => this.addFriend())
 			);
+
 		this.plugin.settings.friends.forEach((friend, index) => {
 			new Setting(containerEl)
 				.setName(`Username: ${friend.username}`)
