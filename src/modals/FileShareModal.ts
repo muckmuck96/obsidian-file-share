@@ -1,15 +1,13 @@
-import { Modal, Notice, TFile } from "obsidian";
+import { Notice, SuggestModal, TFile } from "obsidian";
 import FileSharePlugin from "main";
 import { IFriend } from "interfaces/IFriend";
 import { Socket } from "core/Socket";
 
-class FileShareModal extends Modal {
+class FileShareModal extends SuggestModal<IFriend> {
 	private plugin: FileSharePlugin;
 	private socket: Socket;
 	private file: TFile | null;
 	private friends: IFriend[];
-	private inputEl: HTMLInputElement;
-	private listEl: HTMLElement;
 
 	constructor(
 		plugin: FileSharePlugin,
@@ -24,46 +22,18 @@ class FileShareModal extends Modal {
 		this.friends = friends;
 	}
 
-	onOpen(): void {
-		const { contentEl } = this;
-		contentEl.empty();
-		contentEl.addClass("file-share-modal");
-
-		this.inputEl = contentEl.createEl("input", {
-			type: "text",
-			placeholder: "Select a friend to share the file with",
-		});
-		this.listEl = contentEl.createEl("div", { cls: "file-share-list" });
-
-		this.inputEl.addEventListener("input", () => this.updateList());
-
-		this.updateList();
+	getSuggestions(query: string): IFriend[] {
+		return this.friends.filter((friend) =>
+			friend.username.toLowerCase().includes(query.toLowerCase())
+		);
 	}
 
-	updateList(): void {
-		const query = this.inputEl.value.toLowerCase();
-		this.listEl.empty();
+	renderSuggestion(friend: IFriend, el: HTMLElement) {
+		el.createEl("div", { text: friend.username });
+	}
 
-		const filteredFriends = this.friends.filter((friend) =>
-			friend.username.toLowerCase().includes(query)
-		);
-
-		if (filteredFriends.length === 0) {
-			this.listEl.createEl("div", {
-				text: "No friends found",
-				cls: "no-friends",
-			});
-		} else {
-			filteredFriends.forEach((friend) => {
-				const itemEl = this.listEl.createEl("div", {
-					text: friend.username,
-					cls: "file-share-item",
-				});
-				itemEl.addEventListener("click", () =>
-					this.checkOnlineAndSendFile(friend)
-				);
-			});
-		}
+	onChooseSuggestion(friend: IFriend, evt: MouseEvent | KeyboardEvent) {
+		this.checkOnlineAndSendFile(friend);
 	}
 
 	checkOnlineAndSendFile(friend: IFriend): void {

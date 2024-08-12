@@ -1,5 +1,5 @@
 import FileSharePlugin from "main";
-import { App, Modal, Notice } from "obsidian";
+import { App, Modal, Notice, Setting } from "obsidian";
 import { FileShareSettingTab } from "settings/FileShareSettingTab";
 
 export class FriendModal extends Modal {
@@ -8,6 +8,8 @@ export class FriendModal extends Modal {
 	usernameInput: HTMLInputElement;
 	fileShareSettingTab: FileShareSettingTab;
 	publicKeyInput: HTMLInputElement;
+	username: string;
+	publicKey: string;
 
 	constructor(
 		app: App,
@@ -24,39 +26,46 @@ export class FriendModal extends Modal {
 	onOpen(): void {
 		const { contentEl } = this;
 		contentEl.empty();
-		contentEl.classList.add("setting-tab-modal");
 
 		contentEl.createEl("h2", {
 			text: this.index === null ? "Add Friend" : "Edit Friend",
 		});
 
-		const form = contentEl.createEl("div", { cls: "form-group" });
-
-		const usernameDiv = form.createEl("div", { cls: "setting-item" });
-		usernameDiv.createEl("label", { text: "Username" });
-		this.usernameInput = usernameDiv.createEl("input", {
-			type: "text",
-			cls: "input",
-		});
-
-		const publicKeyDiv = form.createEl("div", { cls: "setting-item" });
-		publicKeyDiv.createEl("label", { text: "Key" });
-		this.publicKeyInput = publicKeyDiv.createEl("input", {
-			type: "text",
-			cls: "input",
-		});
-
 		if (this.index !== null) {
 			const friend = this.plugin.settings.friends[this.index];
-			this.usernameInput.value = friend.username;
-			this.publicKeyInput.value = friend.publicKey;
+			this.username = friend.username;
+			this.publicKey = friend.publicKey;
 		}
 
-		const saveButton = contentEl.createEl("button", {
-			text: "Save",
-			cls: "mod-cta",
-		});
-		saveButton.addEventListener("click", () => this.saveFriend());
+		new Setting(contentEl)
+			.setName('Username')
+			.addText((text) => {
+				text.setValue(this.username);
+				text.onChange((value) => {
+					this.username = value;
+				});
+			}
+		);
+		
+		new Setting(contentEl)
+			.setName('Key')
+			.addText((text) => {
+				text.setValue(this.publicKey);
+				text.onChange((value) => {
+					this.publicKey = value;
+				});
+			}
+		);
+
+		new Setting(contentEl)
+			.addButton((btn) =>
+				btn
+				.setButtonText("Save")
+				.setCta()
+				.onClick(() => {
+					this.close();
+					this.saveFriend();
+				}));
 	}
 
 	saveFriend(): void {
