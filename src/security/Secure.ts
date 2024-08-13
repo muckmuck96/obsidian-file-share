@@ -55,7 +55,6 @@ export class Secure {
 			encryptedAesKey
 		);
 
-		// Decrypt the file using AES-256
 		const decipher = crypto.createDecipheriv("aes-256-cbc", aesKey, iv);
 		return Buffer.concat([
 			decipher.update(encryptedFile),
@@ -110,17 +109,15 @@ export class Secure {
 		);
 		const fileContent = await this.plugin.app.vault.readBinary(file);
 
-		const aesKey = crypto.randomBytes(32); // AES-256 key
-		const iv = crypto.randomBytes(16); // Initialization vector
+		const aesKey = crypto.randomBytes(32);  
+		const iv = crypto.randomBytes(16); 
 
-		// Encrypt the file using AES-256
 		const cipher = crypto.createCipheriv("aes-256-cbc", aesKey, iv);
 		const encryptedFile = Buffer.concat([
 			cipher.update(Buffer.from(fileContent)),
 			cipher.final(),
 		]);
 
-		// Encrypt the AES key using the receiver's public key (RSA)
 		const encryptedAesKey = crypto.publicEncrypt(publicKey, aesKey);
 
 		return {

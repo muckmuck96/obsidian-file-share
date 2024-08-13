@@ -26,13 +26,6 @@ export class FileShareSettingTab extends PluginSettingTab {
 
 		containerEl.empty();
 
-		const fragment = new DocumentFragment();
-		fragment.createEl("span").innerHTML =
-			"File Share Settings > Read the <a href='https://muckmuck96.github.io/obsidian-file-share/'>documentation</a>";
-
-		new Setting(containerEl).setName(fragment).setHeading();
-
-		// Display the user's public key
 		new Setting(containerEl)
 			.setName("Your key")
 			.setDesc("This is your key. Share it with your friends.")
@@ -69,7 +62,6 @@ export class FileShareSettingTab extends PluginSettingTab {
 					})
 			);
 
-		// Folder Setting
 		new Setting(containerEl)
 			.setName("Receive folder")
 			.setDesc("Select the folder where received files will be saved.")
@@ -134,6 +126,23 @@ export class FileShareSettingTab extends PluginSettingTab {
 						this.plugin.settings.socketUrl = value;
 						await this.plugin.saveSettings();
 					})
+			);
+
+		new Setting(containerEl)
+			.setName("Need any help?")
+			.setDesc(
+				"Feel free to explore the documentation for comprehensive guidance and support."
+			)
+			.addButton((button) =>
+				button
+					.setButtonText("Open documentation")
+					.setCta()
+					.onClick(() =>
+						window.open(
+							"https://muckmuck96.github.io/obsidian-file-share/",
+							"_blank"
+						)
+					)
 			);
 
 		new Setting(containerEl)
