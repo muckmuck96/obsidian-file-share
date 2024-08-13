@@ -12,10 +12,17 @@ In either case, we strongly recommend using an SSL connection for your socket se
 To start the server using Docker, run the following command:
 
 ```bash
-docker run -dit -p 3000:3000 jloferer96/obsidian-file-share-server:latest
+docker run -dit -p 3000:3000 -e SOCKET_PORT=3000 -e RATE_LIMITER_WINDOW_MS=900000 -e RATE_LIMITER_MAX_REQUESTS=10 -e RATE_LIMITER_MAX_CONNECTIONS=5 -e CERT_PEM_PATH=path-to-your-cert-file -e KEY_PEM_PATH=path-to-your-key-file jloferer96/obsidian-file-share-server:latest
 ```
 
-Feel free to use any port. In this example, we use port `3000`.
+| Environment variable | default | description |
+| --- | --- | --- |
+| SOCKET_PORT | `3000` | Defines the port number on which the socket server operates within the container. |
+| RATE_LIMITER_WINDOW_MS | `900000` | Defines the time window (in milliseconds) during which a specific client can establish a certain number of connections or send a specific number of requests. |
+| RATE_LIMITER_MAX_REQUESTS | `100` | Specifies the maximum number of requests a client is permitted to make within the defined time window. Once this limit is reached, the client will be temporarily blocked from making further requests until the window resets. |
+| RATE_LIMITER_MAX_CONNECTIONS | `10` | Determines the maximum number of connections that a client can establish within the specified time window. If this threshold is exceeded, the client will be blocked and forcibly disconnected, preventing further connections until the window resets. |
+| CERT_PEM_PATH | `(empty)` | Specifies the file path to the SSL certificate in PEM format. This certificate is used to secure the communication between the server and clients, ensuring encrypted data transmission. |
+| KEY_PEM_PATH | `(empty)` | Specifies the file path to the SSL key in PEM format. This key works in conjunction with the SSL certificate to enable secure connections by encrypting and decrypting data exchanges. |
 
 ## Use our code in your setup
 
