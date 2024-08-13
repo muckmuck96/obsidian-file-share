@@ -88,13 +88,17 @@ export class FileShareSettingTab extends PluginSettingTab {
 				toggle
 					.setValue(this.plugin.settings.autoAcceptFiles)
 					.onChange(async (value) => {
-						const confirmation = confirm(
-							"Are you sure you want to activate this option?."
-						);
+						let confirmation = true;
+						if (!this.plugin.settings.autoAcceptFiles && value) {
+							confirmation = confirm(
+								"Are you sure you want to activate this option?."
+							);
+						}
 						if (confirmation) {
 							this.plugin.settings.autoAcceptFiles = value;
 							await this.plugin.saveSettings();
 						}
+						this.display();
 					});
 			});
 
