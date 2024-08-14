@@ -26,7 +26,8 @@ export default defineConfig({
         text: 'Enhanced settings',
         link: '/enhanced-settings',
         items: [
-          { text: 'Configure server', link: '/enhanced-server-configuration' }
+          { text: 'Configure server', link: '/enhanced-server-configuration' },
+          { text: 'Workflow diagram', link: '/enhanced-workflow-diagram' }
         ]
       },
       {
