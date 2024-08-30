@@ -21,13 +21,15 @@ class FileSharePlugin extends Plugin {
 
 		this.secure = new Secure(this);
 
-		if (!this.settings.privateKey || !this.settings.publicKey) {
-			const { privateKey, publicKey } =
-				await this.secure.generateKeyPair();
-			this.settings.privateKey = privateKey;
-			this.settings.publicKey = publicKey;
-			await this.saveSettings();
-		}
+		this.app.workspace.onLayoutReady(async () => {
+			if (!this.settings.privateKey || !this.settings.publicKey) {
+				const { privateKey, publicKey } =
+					await this.secure.generateKeyPair();
+				this.settings.privateKey = privateKey;
+				this.settings.publicKey = publicKey;
+				await this.saveSettings();
+			}
+		});
 
 		this.connectionStatus = this.addStatusBarItem();
 
