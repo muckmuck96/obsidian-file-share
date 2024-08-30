@@ -54,12 +54,7 @@ export class Socket {
 		this.ws.onopen = () => {
 			new Notice("FileShare connection opened.");
 			this.setConnectionStatus("connected");
-			this.ws.send(
-				JSON.stringify({
-					type: "login",
-					name: this.plugin.settings.publicKey || "",
-				})
-			);
+			this.send("login", { name: this.plugin.settings.publicKey || "" });
 		};
 
 		this.ws.onmessage = (message) => {
@@ -87,15 +82,12 @@ export class Socket {
 					const hash = accept
 						? this.plugin.secure.generateHash(data)
 						: "";
-					this.ws.send(
-						JSON.stringify({
-							type: "response",
-							target: data.sender,
-							accepted: accept,
-							filename: data.filename,
-							hash: hash,
-						})
-					);
+					this.send("response", {
+						target: data.sender,
+						accepted: accept,
+						filename: data.filename,
+						hash: hash,
+					});
 				}
 			}
 		};
