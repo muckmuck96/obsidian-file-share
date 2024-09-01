@@ -11,7 +11,7 @@ Explore a comprehensive list of all available settings, complete with detailed e
 ### Your key
 Upon enabling the plugin for the first time, a unique key will be automatically generated for you. You can easily copy this key by clicking the copy icon (![copy-icon](/copyIcon.png)).
 
-If you wish to reset your key, simply click the reset icon (![reset-icon](/resetIcon.png)). However, please note that doing so will invalidate your old key, meaning you will no longer be able to send or receive files with anyone who has your previous key. To continue sharing files, you'll need to provide your new key to your [configured friends](start-sharing.md).
+If you wish to reset your key, simply click the reset icon (![reset-icon](/resetIcon.png)). However, please note that doing so will invalidate your old key, meaning you will no longer be able to send or receive files with anyone who has your previous key. To continue sharing files, you'll need to provide your new key to your [configured friends](getting-started.md#add-a-friend).
 
 Default: `your generated key`
 
@@ -33,6 +33,6 @@ This option specifies the socket server used to exchange files with your friends
 Default: `wss://ws-fileshare.asss.ist`
 
 ### Add Friend
-Add and manage friends with whom you want to exchange files. For more detailed instructions, visit the [start sharing](start-sharing.md) section.
+Add and manage friends with whom you want to exchange files. For more detailed instructions, visit the [start sharing](getting-started.md#add-a-friend-and-start-sharing) section.
 
 Default: ` ` (empty)

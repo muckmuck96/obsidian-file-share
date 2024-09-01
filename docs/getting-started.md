@@ -52,7 +52,7 @@ Once you have at least one friend in your friend list (and they have added you t
 
    | Response                        | What to Do                                      |
    |---------------------------------|-------------------------------------------------|
-   | XYZ is offline at the moment         | Inform your friend they need to [toggle their connection](start-sharing.md#toggle-connection), or they might not be available to receive files right now. |
+   | XYZ is offline at the moment         | Inform your friend they need to [toggle their connection](#toggle-connection), or they might not be available to receive files right now. |
    | Request sent to xyz for file abc       | Wait for your friend to accept or decline your file request. |
    | File request accepted by xyz    | Your friend has accepted your file request.     |
    | File request declined by xyz    | Your friend has declined your file request.     |
