@@ -16,10 +16,8 @@ export default defineConfig({
         text: 'Getting started',
         link: '/getting-started',
         items: [
-          { text: 'Installation', link: '/installation' },
-          { text: 'Configure settings', link: '/settings' },
-          { text: 'Start sharing', link: '/start-sharing' },
-          { text: 'Receive a file', link: '/receive-file' }
+          { text: 'Receive a file', link: '/receive-file' },
+          { text: 'Settings', link: '/settings' }
         ]
       },
       {

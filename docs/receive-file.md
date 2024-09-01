@@ -1,6 +1,6 @@
 # Receive a file
 
-If you have enabled the `Auto-accept incoming files` option (which is not recommended and is done at your own risk), you do not need to take any action. Your incoming files will be automatically saved to your configured `Receive folder`.
+If you have enabled the [`Auto-accept incoming files`](settings.md#auto-acceptiong-incoming-files) option (which is not recommended and is done at your own risk), you do not need to take any action. Your incoming files will be automatically saved to your configured [`Receive folder`](settings.md#receive-folder).
 
 However, if the above option is not enabled, you will receive a popup notification when someone wants to send you a file. You will need to either accept or decline the request. The popup will display the name of the friend who wants to send you the file, along with the filename.
 
