@@ -32,6 +32,11 @@ This option specifies the socket server used to exchange files with your friends
 
 Default: `wss://ws-fileshare.asss.ist`
 
+### Scan files for first-level embedded links
+Enhance the ability to automatically scan your outgoing file for first-level embedded links to other documents or images, ensuring they are transmitted alongside the corresponding attachments.
+
+Default: `off`
+
 ### Add Friend
 Add and manage friends with whom you want to exchange files. For more detailed instructions, visit the [start sharing](getting-started.md#add-a-friend-and-start-sharing) section.
 

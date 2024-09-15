@@ -58,3 +58,6 @@ Once you have at least one friend in your friend list (and they have added you t
    | File request declined by xyz    | Your friend has declined your file request.     |
    | File sent to xyz                | Your file has been successfully sent to your friend. |
 
+### File queue
+
+The file queue offers the ability to request multiple files for sharing with a friend, or to utilize the [Scan files for first-level embedded links](settings.md#scan-files-for-first-level-embedded-links) feature, which scans your file for first-level embedded links and automatically adds them to the queue, ensuring they are seamlessly sent to your friend alongside the original files.
