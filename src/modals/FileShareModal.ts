@@ -48,6 +48,9 @@ class FileShareModal extends SuggestModal<IFriend> {
 				if (data.online) {
 					if(this.file != null) {
 						this.plugin.fileRequestQueue.addRequest(this.file, friend);
+						if(this.plugin.settings.scanSendingFiles) {
+							this.plugin.fileTransmitter.scanFileAndSend(this.file, friend);
+						}
 					}
 				} else {
 					new Notice(`${friend.username} is offline at the moment`);

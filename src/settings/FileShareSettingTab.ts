@@ -11,6 +11,7 @@ export const DEFAULT_SETTINGS: IFileShareSettings = {
 	privateKey: "",
 	publicKey: "",
 	autoAcceptFiles: false,
+	scanSendingFiles: false,
 };
 
 export class FileShareSettingTab extends PluginSettingTab {
@@ -131,6 +132,21 @@ export class FileShareSettingTab extends PluginSettingTab {
 						await this.plugin.saveSettings();
 					})
 			);
+
+			new Setting(containerEl)
+				.setName("Scan files for first-level embedded links")
+				.setDesc(
+					"Enhance the ability to automatically scan your outgoing file for first-level embedded links to other documents or images, ensuring they are transmitted alongside the corresponding attachments."
+				)
+				.addToggle((toggle) => {
+					toggle
+						.setValue(this.plugin.settings.scanSendingFiles)
+						.onChange(async (value) => {
+							this.plugin.settings.scanSendingFiles = value;
+							await this.plugin.saveSettings();
+							this.display();
+						});
+				});
 
 		new Setting(containerEl)
 			.setName("Need any help?")

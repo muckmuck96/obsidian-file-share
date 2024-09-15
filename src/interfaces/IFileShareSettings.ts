@@ -8,4 +8,5 @@ export interface IFileShareSettings {
 	privateKey: string;
 	publicKey: string;
 	autoAcceptFiles: boolean;
+	scanSendingFiles: boolean;
 }

@@ -81,4 +81,22 @@ export class FileTransmitter {
 			new Notice("Failed to save the received file.");
 		}
 	}
+
+	async scanFileAndSend(file: TFile, friend: IFriend): Promise<void> {
+		const content = await this.plugin.app.vault.read(file);
+		const links = content.match(/\[\[(.*?)\]\]/g);
+		if (!links) {
+			return;
+		}
+		links.forEach((link) => {
+			const fileName = link.replace(/\[\[(.*?)\]\]/g, "$1");
+			const linkedFile = this.plugin.app.metadataCache.getFirstLinkpathDest(
+				fileName,
+				file.path
+			);
+			if (linkedFile) {
+				this.plugin.fileRequestQueue.addRequest(linkedFile, friend);
+			}
+		});
+	}
 }
