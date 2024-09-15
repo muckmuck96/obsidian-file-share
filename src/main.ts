@@ -8,6 +8,7 @@ import { IFileShareSettings } from "interfaces/IFileShareSettings";
 import { Secure } from "security/Secure";
 import { Socket } from "core/Socket";
 import { FileTransmitter } from "core/FileTransmitter";
+import { FileRequestQueue } from "core/FileRequestQueue";
 
 class FileSharePlugin extends Plugin {
 	socket: Socket;
@@ -15,6 +16,7 @@ class FileSharePlugin extends Plugin {
 	connectionStatus: HTMLElement;
 	secure: Secure;
 	fileTransmitter: FileTransmitter;
+	fileRequestQueue: FileRequestQueue;
 
 	async onload(): Promise<void> {
 		await this.loadSettings();
@@ -37,6 +39,8 @@ class FileSharePlugin extends Plugin {
 		this.socket.init();
 
 		this.fileTransmitter = new FileTransmitter(this);
+
+		this.fileRequestQueue = new FileRequestQueue(this.fileTransmitter.sendFile, this);
 
 		this.addRibbonIcon("refresh-cw", "Toggle connection", () => {
 			this.socket.toggleConnection();

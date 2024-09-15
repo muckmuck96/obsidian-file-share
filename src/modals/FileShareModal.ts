@@ -46,34 +46,14 @@ class FileShareModal extends SuggestModal<IFriend> {
 				data.target === friend.publicKey
 			) {
 				if (data.online) {
-					const requestData = JSON.stringify({
-						type: "request",
-						target: friend.publicKey,
-						filename: this.file?.name,
-					});
-					const dataSign = this.plugin.secure.signData(requestData);
-					this.socket.send("request", {
-						target: friend.publicKey,
-						filename: this.file?.name,
-						signature: dataSign,
-					});
-					new Notice(
-						`Request sent to ${friend.username} for file ${this.file?.name}`
-					);
+					if(this.file != null) {
+						this.plugin.fileRequestQueue.addRequest(this.file, friend);
+					}
 				} else {
 					new Notice(`${friend.username} is offline at the moment`);
 				}
 			} else if (data.type === "response") {
-				if (data.accepted) {
-					new Notice(`File request accepted by ${friend.username}`);
-					this.plugin.fileTransmitter.sendFile(
-						this.file,
-						friend,
-						data.hash
-					);
-				} else {
-					new Notice(`File request declined by ${friend.username}`);
-				}
+				this.plugin.fileRequestQueue.handleResponse(data.id, data.accepted, data.hash);
 			}
 		};
 	}

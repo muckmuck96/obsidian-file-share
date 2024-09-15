@@ -87,6 +87,7 @@ export class Socket {
 						accepted: accept,
 						filename: data.filename,
 						hash: hash,
+						id: data.id,
 					});
 				}
 			}
