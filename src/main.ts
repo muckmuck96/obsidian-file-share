@@ -110,6 +110,31 @@ class FileSharePlugin extends Plugin {
 			DEFAULT_SETTINGS,
 			await this.loadData()
 		);
+
+		// Migration: Convert old hotkey string to enableHotkey boolean
+		// This ensures friends from version 1.1.0 don't lose their hotkey setup
+		if (this.settings.friends && this.settings.friends.length > 0) {
+			let migrationNeeded = false;
+			this.settings.friends = this.settings.friends.map((friend: any) => {
+				// Check if friend has old hotkey string format
+				if (friend.hotkey && typeof friend.hotkey === 'string') {
+					migrationNeeded = true;
+					// Convert to new format: if hotkey string exists, enable hotkey
+					const { hotkey, ...friendWithoutHotkey } = friend;
+					return {
+						...friendWithoutHotkey,
+						enableHotkey: true
+					};
+				}
+				return friend;
+			});
+
+			// Save migrated settings
+			if (migrationNeeded) {
+				await this.saveSettings();
+				console.log('File Share: Migrated friend hotkey settings to new format');
+			}
+		}
 	}
 
 	async saveSettings(): Promise<void> {
