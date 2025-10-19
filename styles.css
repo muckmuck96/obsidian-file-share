@@ -1,0 +1,77 @@
+/* File Share Transfer Indicators */
+.file-share-indicator {
+	display: inline-block;
+	margin-left: 5px;
+	font-size: 0.9em;
+	vertical-align: middle;
+	animation: pulse 2s ease-in-out infinite;
+}
+
+/* Pulse animation for active transfers */
+@keyframes pulse {
+	0%, 100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.6;
+	}
+}
+
+/* Stop animation for completed/failed states */
+.file-share-indicator.completed,
+.file-share-indicator.failed,
+.file-share-indicator.rejected {
+	animation: none;
+}
+
+/* Release Notes Modal Styling */
+.release-notes-content {
+	max-height: 60vh;
+	overflow-y: auto;
+	padding: 10px 0;
+	line-height: 1.6;
+}
+
+.release-notes-content h2 {
+	margin-top: 1.5em;
+	margin-bottom: 0.5em;
+	font-size: 1.4em;
+}
+
+.release-notes-content h3 {
+	margin-top: 1.2em;
+	margin-bottom: 0.4em;
+	font-size: 1.2em;
+}
+
+.release-notes-content h4 {
+	margin-top: 1em;
+	margin-bottom: 0.3em;
+	font-size: 1.05em;
+}
+
+.release-notes-content p {
+	margin-bottom: 0.8em;
+}
+
+.release-notes-content ul {
+	margin: 0.5em 0;
+	padding-left: 1.5em;
+}
+
+.release-notes-content li {
+	margin-bottom: 0.3em;
+}
+
+/* Fixed width dropdown for receive folder */
+.file-share-receive-folder-dropdown {
+	min-width: 200px !important;
+	max-width: 300px !important;
+	width: 300px !important;
+}
+
+.file-share-receive-folder-dropdown option {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
