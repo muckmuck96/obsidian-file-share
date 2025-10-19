@@ -15,11 +15,11 @@ hero:
       link: /enhanced-settings
 
 features:
-  - title: 🔒 End-to-End Encrypted 
-    details: Experience unparalleled security with files that are end-to-end encrypted and signed, ensuring that only your intended recipient can read them. 
-  - title: 😊 User-Friendly  
-    details: Effortlessly dive into the sharing process with a sleek and intuitive configuration that gets you started in no time.
+  - title: 🔒 End-to-End Encrypted
+    details: Experience unparalleled security with files that are end-to-end encrypted and signed using RSA-2048 + AES-256, ensuring that only your intended recipient can read them. Supports files up to 500MB with automatic chunked transfer.
+  - title: 😊 User-Friendly
+    details: Effortlessly dive into the sharing process with a sleek and intuitive configuration that gets you started in no time. Toggle-based hotkey setup makes advanced features accessible to everyone.
   - title: ✨ Lightweight Design
-    details: Enjoy a streamlined experience with a plugin that is simple to navigate, with straightforward settings that aren't overly complex or cumbersome.
+    details: Enjoy a streamlined experience with a plugin that is simple to navigate. Advanced settings are tucked away in a collapsible section, keeping the interface clean and focused.
 ---
 

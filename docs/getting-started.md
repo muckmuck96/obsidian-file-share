@@ -38,6 +38,8 @@ To connect or disconnect from the configured server, use the reload icon in the 
 
 Once you have at least one friend in your friend list (and they have added you to their list), you can start sharing files with them.
 
+#### Method 1: Using the context menu
+
 1. **Select a File:** Right-click on the specific file you wish to share and choose the `Send to ...` option.
    ::: details Screenshot
    ![sendToContextMenu](/sendToContextMenu.png)
@@ -48,7 +50,7 @@ Once you have at least one friend in your friend list (and they have added you t
    ![sendToFriendList](/sendToFriendList.png)
    :::
 
-3. **Check Notifications:** You should receive a response notification. Here’s what each response means:
+3. **Check Notifications:** You should receive a response notification. Here's what each response means:
 
    | Response                        | What to Do                                      |
    |---------------------------------|-------------------------------------------------|
@@ -57,6 +59,46 @@ Once you have at least one friend in your friend list (and they have added you t
    | File request accepted by xyz    | Your friend has accepted your file request.     |
    | File request declined by xyz    | Your friend has declined your file request.     |
    | File sent to xyz                | Your file has been successfully sent to your friend. |
+
+#### Method 2: Using keyboard shortcuts
+
+You can set up keyboard shortcuts for even faster file sharing:
+
+**General "Send to..." shortcut:**
+1. Go to Obsidian Settings → Hotkeys
+2. Search for "Send current file to..."
+3. Assign your preferred keyboard shortcut
+4. Now you can instantly open the friend selection with your shortcut!
+
+**Per-friend shortcuts:**
+1. Go to File Share settings
+2. Find the friend you want to create a shortcut for
+3. Toggle "Enable hotkey" to ON
+4. Click the ⚙️ settings icon that appears
+5. Assign your preferred keyboard shortcut
+6. Now you can send files directly to that friend without any menus!
+
+::: tip
+Keyboard shortcuts are perfect for quickly sharing notes during conversations or workflows!
+:::
+
+### Share a folder
+
+You can now share entire folders with all their files at once:
+
+1. **Select a Folder:** Right-click on the folder you wish to share and choose the `Send folder to ...` option.
+2. **Choose a Friend:** A modal will open, displaying all your friends. Select the friend you want to send the folder to.
+3. **Automatic processing:** The plugin will:
+   - Collect all files from the folder (including subfolders)
+   - Validate each file before sending
+   - Skip any invalid files with a notification
+   - Send all valid files with their folder structure preserved (if enabled in settings)
+
+::: info
+- Invalid files (wrong type or too large) are automatically skipped
+- You'll see a notification showing how many files were sent and how many were skipped
+- Your friend receives the files with the same folder structure (if [Preserve folder structure](settings.md#preserve-folder-structure) is enabled)
+:::
 
 ### File queue
 
