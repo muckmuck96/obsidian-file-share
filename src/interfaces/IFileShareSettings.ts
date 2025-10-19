@@ -9,4 +9,8 @@ export interface IFileShareSettings {
 	publicKey: string;
 	autoAcceptFiles: boolean;
 	scanSendingFiles: boolean;
+	chunkSize: number;
+	maxFileSize: number;
+	lastSeenVersion: string;
+	preserveFolderStructure: boolean;
 }

@@ -15,6 +15,11 @@ export class Socket {
 	}
 
 	send(type: string, data: unknown): void {
+		if (this.ws.readyState !== WebSocket.OPEN) {
+			new Notice("Cannot send message: Not connected to FileShare server.");
+			console.error("WebSocket is not open. ReadyState:", this.ws.readyState);
+			return;
+		}
 		const payload = Object.assign({ type }, data);
 		this.ws.send(JSON.stringify(payload));
 	}
@@ -27,13 +32,15 @@ export class Socket {
 		this.plugin.connectionStatus.innerText = `FileShare: ${connectionStatus}`;
 	}
 
-	verifySocketURL(): void {
+	async verifySocketURL(): Promise<void> {
 		if (!this.plugin.secure.isSocketURLSecure()) {
 			new Notice(
 				"Socket URL could not be validated for SSL. Using default socket server..."
 			);
 			this.plugin.settings.socketUrl =
 				this.plugin.getDefaultSettings().socketUrl;
+			this.plugin.settings.useCustomSocketUrl = false;
+			await this.plugin.saveSettings();
 		}
 	}
 
@@ -47,8 +54,8 @@ export class Socket {
 		}
 	}
 
-	init(): void {
-		this.verifySocketURL();
+	async init(): Promise<void> {
+		await this.verifySocketURL();
 		this.ws = new WebSocket(this.plugin.settings.socketUrl);
 
 		this.ws.onopen = () => {
@@ -73,6 +80,10 @@ export class Socket {
 					if (data.hash === expectedHash) {
 						this.plugin.fileTransmitter.receiveFile(data);
 					}
+				} else if (data.type == "fileMetadata") {
+					this.plugin.fileTransmitter.receiveFileMetadata(data.payload);
+				} else if (data.type == "fileChunk") {
+					this.plugin.fileTransmitter.receiveFileChunk(data.payload);
 				} else if (data.type == "request") {
 					const accept =
 						this.plugin.settings.autoAcceptFiles ||
