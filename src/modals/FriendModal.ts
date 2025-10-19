@@ -8,6 +8,7 @@ export class FriendModal extends Modal {
 	fileShareSettingTab: FileShareSettingTab;
 	username: string;
 	publicKey: string;
+	enableHotkey: boolean;
 
 	constructor(
 		app: App,
@@ -45,6 +46,18 @@ export class FriendModal extends Modal {
 			});
 		});
 
+		new Setting(contentEl)
+			.setName("Enable hotkey")
+			.setDesc(
+				"Enable a direct send command for this friend. After enabling, you can assign a hotkey in Obsidian's hotkey settings."
+			)
+			.addToggle((toggle) => {
+				toggle.setValue(this.enableHotkey);
+				toggle.onChange((value) => {
+					this.enableHotkey = value;
+				});
+			});
+
 		new Setting(contentEl).addButton((btn) =>
 			btn
 				.setButtonText("Save")
@@ -58,6 +71,7 @@ export class FriendModal extends Modal {
 	saveFriend(): void {
 		const username = this.username;
 		const publicKey = this.publicKey;
+		const enableHotkey = this.enableHotkey;
 
 		if (username.length == 0 || publicKey.length == 0) {
 			new Notice("Please fill out all fields.");
@@ -71,13 +85,20 @@ export class FriendModal extends Modal {
 			return;
 		}
 
+		const friendData = {
+			username,
+			publicKey,
+			...(enableHotkey ? { enableHotkey: true } : {})
+		};
+
 		if (this.index === null) {
-			this.plugin.settings.friends.push({ username, publicKey });
+			this.plugin.settings.friends.push(friendData);
 		} else {
-			this.plugin.settings.friends[this.index] = { username, publicKey };
+			this.plugin.settings.friends[this.index] = friendData;
 		}
 
 		this.plugin.saveSettings();
+		this.plugin.registerFriendCommands(); // Re-register commands with new hotkeys
 		this.close();
 		this.fileShareSettingTab.display();
 	}
@@ -85,10 +106,12 @@ export class FriendModal extends Modal {
 	loadModalForm(): void {
 		this.username = "";
 		this.publicKey = "";
+		this.enableHotkey = false;
 		if (this.index !== null) {
 			const friend = this.plugin.settings.friends[this.index];
 			this.username = friend.username;
 			this.publicKey = friend.publicKey;
+			this.enableHotkey = friend.enableHotkey || false;
 		}
 	}
 }
