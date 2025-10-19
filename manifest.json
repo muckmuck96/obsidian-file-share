@@ -1,7 +1,7 @@
 {
 	"id": "file-share",
 	"name": "File Share",
-	"version": "1.1.0",
+	"version": "1.2.0",
 	"minAppVersion": "1.6.7",
 	"description": "Enables end-to-end encrypted file sharing directly between vaults via a socket server.",
 	"author": "muckmuck",
