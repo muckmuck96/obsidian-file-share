@@ -13,6 +13,7 @@ import { FileValidator } from "utils/FileValidator";
 import { FileTreeDecorator } from "ui/FileTreeDecorator";
 import { ReleaseNotesManager } from "utils/ReleaseNotesManager";
 import { ReleaseNotesModal } from "modals/ReleaseNotesModal";
+import { IFriend } from "interfaces/IFriend";
 
 class FileSharePlugin extends Plugin {
 	socket: Socket;
@@ -41,13 +42,13 @@ class FileSharePlugin extends Plugin {
 			}
 
 			// Check for version updates
-			this.checkForUpdates();
+			void this.checkForUpdates();
 		});
 
 		this.connectionStatus = this.addStatusBarItem();
 
 		this.socket = new Socket(this);
-		this.socket.init();
+		void this.socket.init();
 
 		this.fileTransmitter = new FileTransmitter(this);
 
@@ -115,7 +116,7 @@ class FileSharePlugin extends Plugin {
 		// This ensures friends from version 1.1.0 don't lose their hotkey setup
 		if (this.settings.friends && this.settings.friends.length > 0) {
 			let migrationNeeded = false;
-			this.settings.friends = this.settings.friends.map((friend: any) => {
+			this.settings.friends = this.settings.friends.map((friend: IFriend & { hotkey?: string }) => {
 				// Check if friend has old hotkey string format
 				if (friend.hotkey && typeof friend.hotkey === 'string') {
 					migrationNeeded = true;
@@ -132,7 +133,6 @@ class FileSharePlugin extends Plugin {
 			// Save migrated settings
 			if (migrationNeeded) {
 				await this.saveSettings();
-				console.log('File Share: Migrated friend hotkey settings to new format');
 			}
 		}
 	}
@@ -176,7 +176,7 @@ class FileSharePlugin extends Plugin {
 		this.friendCommandIds = [];
 
 		// Register a command for each friend that has hotkey enabled
-		this.settings.friends.forEach((friend, index) => {
+		this.settings.friends.forEach((friend) => {
 			if (friend.enableHotkey) {
 				// Generate unique command ID based on username
 				const commandId = this.generateHotkeyId(friend.username);
@@ -189,7 +189,7 @@ class FileSharePlugin extends Plugin {
 						const activeFile = this.app.workspace.getActiveFile();
 						if (activeFile) {
 							if (!checking) {
-								this.sendFileToFriend(activeFile, friend);
+								void this.sendFileToFriend(activeFile, friend);
 							}
 							return true;
 						}
@@ -210,7 +210,7 @@ class FileSharePlugin extends Plugin {
 			.replace(/^-|-$/g, "")}`;
 	}
 
-	async sendFileToFriend(file: TFile, friend: any): Promise<void> {
+	async sendFileToFriend(file: TFile, friend: IFriend): Promise<void> {
 		// Check if socket is connected first
 		if (this.socket.getWS().readyState !== WebSocket.OPEN) {
 			new Notice("You are not connected to the FileShare server. Please connect first.");
@@ -237,7 +237,7 @@ class FileSharePlugin extends Plugin {
 				if (data.online) {
 					this.fileRequestQueue.addRequest(file, friend);
 					if (this.settings.scanSendingFiles) {
-						this.fileTransmitter.scanFileAndSend(file, friend);
+						void this.fileTransmitter.scanFileAndSend(file, friend);
 					}
 				} else {
 					new Notice(`${friend.username} is offline at the moment`);

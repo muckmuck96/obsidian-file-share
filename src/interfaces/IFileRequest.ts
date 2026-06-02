@@ -11,4 +11,5 @@ export interface IFileRequest {
     fileId?: string;
     progress?: number;
     sourceFolderPath?: string; // Relative path from the sent folder
+    createdAt?: number; // Timestamp (ms) when the request was queued
 }

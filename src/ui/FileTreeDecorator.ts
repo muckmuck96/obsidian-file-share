@@ -1,4 +1,4 @@
-import { TFile, TFolder, WorkspaceLeaf } from "obsidian";
+import { TFile, TFolder, View } from "obsidian";
 import FileSharePlugin from "main";
 import { FileTransferState } from "interfaces/IFileRequest";
 
@@ -24,6 +24,15 @@ export class FileTreeDecorator {
 		if (this.updateInterval) {
 			window.clearInterval(this.updateInterval);
 		}
+		this.clearAllDecorations();
+	}
+
+	/**
+	 * Immediately remove every transfer indicator from the file tree. The
+	 * regular update loop will re-add indicators only for requests that are
+	 * still in the queue, so clearing the queue first makes this permanent.
+	 */
+	public reset(): void {
 		this.clearAllDecorations();
 	}
 
@@ -160,11 +169,12 @@ export class FileTreeDecorator {
 		}
 	}
 
+	private static readonly ALL_STATES: FileTransferState[] = [
+		'pending', 'accepted', 'sending', 'completed', 'failed', 'rejected'
+	];
+
 	private createDecoration(state: FileTransferState, progress: number): HTMLElement {
-		const container = document.createElement('span');
-		container.addClass('file-share-indicator');
-		container.style.marginLeft = '5px';
-		container.style.fontSize = '0.9em';
+		const container = createSpan({ cls: 'file-share-indicator' });
 
 		this.updateDecorationContent(container, state, progress);
 
@@ -173,50 +183,44 @@ export class FileTreeDecorator {
 
 	private updateDecorationContent(element: HTMLElement, state: FileTransferState, progress: number): void {
 		let icon = '';
-		let color = '';
 		let title = '';
 
 		switch (state) {
 			case 'pending':
 				icon = '⏳';
-				color = '#888';
 				title = 'Waiting for response...';
 				break;
 			case 'accepted':
 				icon = '✓';
-				color = '#4CAF50';
 				title = 'Request accepted';
 				break;
 			case 'sending':
 				icon = '📤';
-				color = '#2196F3';
 				title = `Sending... ${progress}%`;
 				break;
 			case 'completed':
 				icon = '✅';
-				color = '#4CAF50';
 				title = 'Transfer completed';
 				break;
 			case 'failed':
 				icon = '❌';
-				color = '#F44336';
 				title = 'Transfer failed';
 				break;
 			case 'rejected':
 				icon = '🚫';
-				color = '#FF9800';
 				title = 'Request rejected';
 				break;
 		}
 
-		element.textContent = icon;
-		element.style.color = color;
-		element.title = title;
-
 		// Add progress percentage for sending state
-		if (state === 'sending' && progress > 0) {
-			element.textContent = `${icon} ${progress}%`;
-		}
+		element.textContent = state === 'sending' && progress > 0
+			? `${icon} ${progress}%`
+			: icon;
+		element.setAttribute('aria-label', title);
+
+		// Reflect the state via CSS classes (colors/animation live in styles.css)
+		element.removeClasses(FileTreeDecorator.ALL_STATES);
+		element.addClass(state);
 	}
 
 	private removeDecoration(path: string): void {
@@ -234,7 +238,7 @@ export class FileTreeDecorator {
 		this.decorations.clear();
 	}
 
-	private getFileExplorer(): any {
+	private getFileExplorer(): View | null {
 		const leaves = this.plugin.app.workspace.getLeavesOfType('file-explorer');
 		if (leaves.length > 0) {
 			return leaves[0].view;
@@ -248,7 +252,7 @@ export class FileTreeDecorator {
 		if (!fileExplorer) return null;
 
 		// Search through all file items in the explorer
-		const fileItems = document.querySelectorAll('.nav-file');
+		const fileItems = activeDocument.querySelectorAll('.nav-file');
 		for (const item of Array.from(fileItems)) {
 			const titleElement = item.querySelector('.nav-file-title');
 			if (titleElement) {
@@ -260,7 +264,7 @@ export class FileTreeDecorator {
 		}
 
 		// Search through all folder items in the explorer
-		const folderItems = document.querySelectorAll('.nav-folder');
+		const folderItems = activeDocument.querySelectorAll('.nav-folder');
 		for (const item of Array.from(folderItems)) {
 			const titleElement = item.querySelector('.nav-folder-title');
 			if (titleElement) {

@@ -49,7 +49,7 @@ export class Socket {
 			this.ws.close();
 			new Notice("Closing connection...");
 		} else if (this.ws.readyState !== WebSocket.OPEN) {
-			this.init();
+			void this.init();
 			new Notice("Trying to connect...");
 		}
 	}
@@ -78,17 +78,24 @@ export class Socket {
 				if (data.type == "file") {
 					const expectedHash = this.plugin.secure.generateHash(data);
 					if (data.hash === expectedHash) {
-						this.plugin.fileTransmitter.receiveFile(data);
+						void this.plugin.fileTransmitter.receiveFile(data);
 					}
 				} else if (data.type == "fileMetadata") {
-					this.plugin.fileTransmitter.receiveFileMetadata(data.payload);
+					void this.plugin.fileTransmitter.receiveFileMetadata(data.payload);
 				} else if (data.type == "fileChunk") {
-					this.plugin.fileTransmitter.receiveFileChunk(data.payload);
+					void this.plugin.fileTransmitter.receiveFileChunk(data.payload);
 				} else if (data.type == "request") {
+					// Intentionally uses the native confirm() rather than an
+					// in-app modal: an incoming file request can arrive while
+					// the user is working in another application, and the
+					// native dialog surfaces over other windows (and flashes
+					// the taskbar on Windows). An Obsidian modal would stay
+					// hidden behind the focused app and could be missed.
+					// eslint-disable-next-line no-alert
 					const accept =
 						this.plugin.settings.autoAcceptFiles ||
 						confirm(
-							`${sender?.username} want to sent you: ${data.filename}. Accept it?`
+							`${sender?.username} wants to send you: ${data.filename}. Accept it?`
 						);
 					const hash = accept
 						? this.plugin.secure.generateHash(data)

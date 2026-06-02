@@ -100,7 +100,7 @@ export class FileTransmitter {
 
 			// Small delay between chunks to avoid overwhelming the socket
 			if (i < chunks.length - 1) {
-				await new Promise(resolve => setTimeout(resolve, 10));
+				await new Promise(resolve => activeWindow.setTimeout(resolve, 10));
 			}
 		}
 
@@ -187,14 +187,13 @@ export class FileTransmitter {
 		if (!folder) {
 			try {
 				await this.plugin.app.vault.createFolder(folderPath);
-			} catch (error) {
+			} catch {
 				// Folder might already exist, ignore error
-				console.log(`Folder creation note: ${error}`);
 			}
 		}
 	}
 
-	async scanFileAndSend(file: TFile, friend: IFriend, sourceFolderPath?: string): Promise<void> {
+	async scanFileAndSend(file: TFile, friend: IFriend, _sourceFolderPath?: string): Promise<void> {
 		const content = await this.plugin.app.vault.read(file);
 		const links = content.match(/\[\[(.*?)\]\]/g);
 		if (!links) {
@@ -213,9 +212,6 @@ export class FileTransmitter {
 				if (validation.valid) {
 					// Don't pass sourceFolderPath for embedded linked files
 					this.plugin.fileRequestQueue.addRequest(linkedFile, friend);
-				} else {
-					// Silently skip invalid files or optionally log them
-					console.log(`Skipping invalid linked file: ${linkedFile.name} - ${validation.error}`);
 				}
 			}
 		}

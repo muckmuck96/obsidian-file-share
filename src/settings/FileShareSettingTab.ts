@@ -2,6 +2,7 @@ import { IFileShareSettings } from "interfaces/IFileShareSettings";
 import FileSharePlugin from "main";
 import { App, Notice, PluginSettingTab, Setting, TFolder } from "obsidian";
 import { FriendModal } from "modals/FriendModal";
+import { ConfirmModal } from "modals/ConfirmModal";
 
 export const DEFAULT_SETTINGS: IFileShareSettings = {
 	useCustomSocketUrl: false,
@@ -42,7 +43,7 @@ export class FileShareSettingTab extends PluginSettingTab {
 					.setIcon("copy")
 					.setTooltip("Copy to clipboard")
 					.onClick(() => {
-						navigator.clipboard.writeText(
+						void navigator.clipboard.writeText(
 							this.plugin.settings.publicKey
 						);
 						new Notice("Key copied to clipboard");
@@ -52,18 +53,26 @@ export class FileShareSettingTab extends PluginSettingTab {
 				button
 					.setIcon("reset")
 					.setTooltip("Generate new key pair")
-					.onClick(async () => {
-						const confirmation = confirm(
-							"Are you sure you want to generate a new key pair? Your current key will be lost."
-						);
-						if (confirmation) {
-							const { privateKey, publicKey } =
-								await this.plugin.secure.generateKeyPair();
-							this.plugin.settings.privateKey = privateKey;
-							this.plugin.settings.publicKey = publicKey;
-							await this.plugin.saveSettings();
-							this.display();
-						}
+					.onClick(() => {
+						new ConfirmModal(
+							this.app,
+							"Are you sure you want to generate a new key pair? Your current key will be lost.",
+							(confirmed) => {
+								if (!confirmed) {
+									return;
+								}
+								void (async () => {
+									const { privateKey, publicKey } =
+										await this.plugin.secure.generateKeyPair();
+									this.plugin.settings.privateKey = privateKey;
+									this.plugin.settings.publicKey = publicKey;
+									await this.plugin.saveSettings();
+									this.display();
+								})();
+							},
+							"Generate",
+							"Cancel"
+						).open();
 					})
 			);
 
@@ -120,6 +129,23 @@ export class FileShareSettingTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
+			.setName("Reset transfer indicators")
+			.setDesc(
+				"Clear all file-transfer indicators from the file tree. Use this if an indicator gets stuck after a transfer was interrupted."
+			)
+			.addButton((button) =>
+				button
+					.setButtonText("Reset")
+					.onClick(() => {
+						this.plugin.fileRequestQueue.clearAll();
+						if (this.plugin.fileTreeDecorator) {
+							this.plugin.fileTreeDecorator.reset();
+						}
+						new Notice("Transfer indicators reset");
+					})
+			);
+
+		new Setting(containerEl)
 			.setName("Need any help?")
 			.setDesc(
 				"Feel free to explore the documentation for comprehensive guidance and support."
@@ -168,12 +194,26 @@ export class FileShareSettingTab extends PluginSettingTab {
 						.onClick(() => this.editFriend(index))
 				)
 				.addButton((button) =>
-					button.setButtonText("Delete").onClick(() => {
-						this.plugin.settings.friends.splice(index, 1);
-						this.plugin.saveSettings();
-						this.plugin.registerFriendCommands(); // Re-register commands after deleting
-						this.display();
-					})
+					button
+						.setButtonText("Delete")
+						.setWarning()
+						.onClick(() => {
+							new ConfirmModal(
+								this.app,
+								`Delete friend "${friend.username}"? This cannot be undone.`,
+								(confirmed) => {
+									if (!confirmed) {
+										return;
+									}
+									this.plugin.settings.friends.splice(index, 1);
+									void this.plugin.saveSettings();
+									this.plugin.registerFriendCommands(); // Re-register commands after deleting
+									this.display();
+								},
+								"Delete",
+								"Cancel"
+							).open();
+						})
 				);
 
 			// Add link to hotkey settings if hotkey is enabled
@@ -195,25 +235,26 @@ export class FileShareSettingTab extends PluginSettingTab {
 
 		containerEl.createEl("hr");
 
-		// Advanced Settings Section (Collapsible)
+		// Advanced section (Collapsible)
 		const advancedSettingsHeader = new Setting(containerEl)
-			.setName("Advanced Settings")
+			.setName("Advanced")
 			.setDesc(
-				"⚠️ Only change these settings if you know what you are doing."
+				"Warning: only change these options if you know what you are doing."
 			)
 			.setHeading();
 
 		const advancedSettingsContent = containerEl.createDiv();
-		advancedSettingsContent.style.display = "none";
+		advancedSettingsContent.addClass("file-share-advanced-content");
 
 		advancedSettingsHeader.addToggle((toggle) =>
 			toggle
 				.setValue(false)
 				.setTooltip("Show/hide advanced settings")
 				.onChange((value) => {
-					advancedSettingsContent.style.display = value
-						? "block"
-						: "none";
+					advancedSettingsContent.toggleClass(
+						"file-share-advanced-content--visible",
+						value
+					);
 				})
 		);
 
@@ -244,9 +285,15 @@ export class FileShareSettingTab extends PluginSettingTab {
 					.onChange(async (value) => {
 						let confirmation = true;
 						if (!this.plugin.settings.autoAcceptFiles && value) {
-							confirmation = confirm(
-								"Are you sure you want to activate this option?."
-							);
+							confirmation = await new Promise<boolean>((resolve) => {
+								new ConfirmModal(
+									this.app,
+									"Are you sure you want to activate this option?",
+									resolve,
+									"Activate",
+									"Cancel"
+								).open();
+							});
 						}
 						if (confirmation) {
 							this.plugin.settings.autoAcceptFiles = value;
@@ -286,7 +333,7 @@ export class FileShareSettingTab extends PluginSettingTab {
 					});
 
 				// Add blur event to validate when user loses focus
-				text.inputEl.addEventListener("blur", async () => {
+				text.inputEl.addEventListener("blur", () => {
 					// Validate socket URL security when focus is lost
 					if (this.plugin.settings.useCustomSocketUrl && !this.plugin.secure.isSocketURLSecure()) {
 						new Notice(
@@ -295,7 +342,7 @@ export class FileShareSettingTab extends PluginSettingTab {
 						this.plugin.settings.socketUrl =
 							this.plugin.getDefaultSettings().socketUrl;
 						this.plugin.settings.useCustomSocketUrl = false;
-						await this.plugin.saveSettings();
+						void this.plugin.saveSettings();
 						this.display();
 					}
 				});

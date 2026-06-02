@@ -1,4 +1,4 @@
-import { App, Modal, Notice } from "obsidian";
+import { App, Modal } from "obsidian";
 
 export class ReleaseNotesModal extends Modal {
 	private version: string;
@@ -53,8 +53,7 @@ export class ReleaseNotesModal extends Modal {
 		}
 
 		const buttonContainer = contentEl.createDiv();
-		buttonContainer.style.marginTop = "20px";
-		buttonContainer.style.textAlign = "right";
+		buttonContainer.addClass("release-notes-buttons");
 
 		const closeButton = buttonContainer.createEl("button", { text: "Close" });
 		closeButton.addEventListener("click", () => {

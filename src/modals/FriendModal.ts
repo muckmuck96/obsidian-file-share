@@ -97,7 +97,7 @@ export class FriendModal extends Modal {
 			this.plugin.settings.friends[this.index] = friendData;
 		}
 
-		this.plugin.saveSettings();
+		void this.plugin.saveSettings();
 		this.plugin.registerFriendCommands(); // Re-register commands with new hotkeys
 		this.close();
 		this.fileShareSettingTab.display();

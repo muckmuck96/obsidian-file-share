@@ -4,7 +4,14 @@ import FileSharePlugin from "main";
 import { IFileRequest } from "interfaces/IFileRequest";
 
 export class FileRequestQueue {
+    // Safety net: a request that never reaches a terminal state (e.g. the
+    // recipient never responds, or a "response" message is lost on reconnect)
+    // would otherwise leave a transfer indicator stuck until Obsidian restarts.
+    // Expire such requests after this long so the indicator clears on its own.
+    private static readonly STUCK_REQUEST_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+
     private queue: Map<string, IFileRequest>;
+    private timeouts: Map<string, number>;
     private sendFileMethod: (
 		file: TFile | null,
 		friend: IFriend,
@@ -20,6 +27,7 @@ export class FileRequestQueue {
 		sourceFolderPath?: string
 	) => Promise<void>, plugin: FileSharePlugin) {
         this.queue = new Map();
+        this.timeouts = new Map();
         this.sendFileMethod = sendFileMethod;
         this.plugin = plugin;
     }
@@ -33,8 +41,10 @@ export class FileRequestQueue {
             state: "pending",
             progress: 0,
             sourceFolderPath,
+            createdAt: Date.now(),
         };
         this.queue.set(requestId, request);
+        this.scheduleStuckTimeout(requestId);
 
         this.sendIFileRequest(request);
     }
@@ -79,25 +89,68 @@ export class FileRequestQueue {
                     .then(() => {
                         this.updateRequestState(requestId, "completed", 100);
                         // Clean up after a delay
-                        setTimeout(() => {
-                            this.queue.delete(requestId);
-                        }, 3000);
+                        this.scheduleRemoval(requestId, 3000);
                     })
                     .catch((error) => {
                         console.error("Error sending the file:", error);
                         this.updateRequestState(requestId, "failed");
-                        setTimeout(() => {
-                            this.queue.delete(requestId);
-                        }, 5000);
+                        this.scheduleRemoval(requestId, 5000);
                     });
             } else {
                 this.updateRequestState(requestId, "rejected");
                 new Notice(`File request declined by ${request.recipient.username}`);
-                setTimeout(() => {
-                    this.queue.delete(requestId);
-                }, 3000);
+                this.scheduleRemoval(requestId, 3000);
             }
         }
+    }
+
+    /**
+     * Remove all queued requests and cancel their timers. Used by the
+     * "Reset transfer indicators" action to clear indicators that got stuck.
+     */
+    public clearAll(): void {
+        for (const handle of this.timeouts.values()) {
+            activeWindow.clearTimeout(handle);
+        }
+        this.timeouts.clear();
+        this.queue.clear();
+    }
+
+    public getActiveRequestCount(): number {
+        return this.queue.size;
+    }
+
+    private scheduleStuckTimeout(requestId: string): void {
+        const handle = activeWindow.setTimeout(() => {
+            const request = this.queue.get(requestId);
+            // Only drop requests that never reached completion; a completed
+            // request schedules its own (shorter) removal.
+            if (request && request.state !== "completed") {
+                this.removeRequest(requestId);
+            }
+        }, FileRequestQueue.STUCK_REQUEST_TIMEOUT_MS);
+        this.timeouts.set(requestId, handle);
+    }
+
+    private scheduleRemoval(requestId: string, delayMs: number): void {
+        // Replace the long stuck-timeout with the shorter terminal-state delay.
+        const existing = this.timeouts.get(requestId);
+        if (existing !== undefined) {
+            activeWindow.clearTimeout(existing);
+        }
+        const handle = activeWindow.setTimeout(() => {
+            this.removeRequest(requestId);
+        }, delayMs);
+        this.timeouts.set(requestId, handle);
+    }
+
+    private removeRequest(requestId: string): void {
+        const handle = this.timeouts.get(requestId);
+        if (handle !== undefined) {
+            activeWindow.clearTimeout(handle);
+            this.timeouts.delete(requestId);
+        }
+        this.queue.delete(requestId);
     }
 
     private generateRequestId(): string {

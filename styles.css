@@ -24,6 +24,24 @@
 	animation: none;
 }
 
+/* Per-state colors for the transfer indicator */
+.file-share-indicator.pending {
+	color: var(--text-muted);
+}
+.file-share-indicator.accepted,
+.file-share-indicator.completed {
+	color: var(--color-green);
+}
+.file-share-indicator.sending {
+	color: var(--color-blue);
+}
+.file-share-indicator.failed {
+	color: var(--color-red);
+}
+.file-share-indicator.rejected {
+	color: var(--color-orange);
+}
+
 /* Release Notes Modal Styling */
 .release-notes-content {
 	max-height: 60vh;
@@ -63,15 +81,32 @@
 	margin-bottom: 0.3em;
 }
 
-/* Fixed width dropdown for receive folder */
-.file-share-receive-folder-dropdown {
-	min-width: 200px !important;
-	max-width: 300px !important;
-	width: 300px !important;
+/* Fixed width dropdown for receive folder.
+   Combined with the built-in `.dropdown` class to raise specificity
+   above Obsidian's default dropdown sizing without using !important. */
+.dropdown.file-share-receive-folder-dropdown {
+	min-width: 200px;
+	max-width: 300px;
+	width: 300px;
 }
 
-.file-share-receive-folder-dropdown option {
+.dropdown.file-share-receive-folder-dropdown option {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+}
+
+/* Collapsible advanced section */
+.file-share-advanced-content {
+	display: none;
+}
+
+.file-share-advanced-content.file-share-advanced-content--visible {
+	display: block;
+}
+
+/* Release notes modal button row */
+.release-notes-buttons {
+	margin-top: 20px;
+	text-align: right;
 }

@@ -32,11 +32,11 @@ class FileShareModal extends SuggestModal<IFriend> {
 	}
 
 	renderSuggestion(friend: IFriend, el: HTMLElement): void {
-		el.createEl("div", { text: friend.username });
+		el.createDiv({ text: friend.username });
 	}
 
-	onChooseSuggestion(friend: IFriend, evt: MouseEvent | KeyboardEvent): void {
-		this.checkOnlineAndSendFile(friend);
+	onChooseSuggestion(friend: IFriend, _evt: MouseEvent | KeyboardEvent): void {
+		void this.checkOnlineAndSendFile(friend);
 	}
 
 	async checkOnlineAndSendFile(friend: IFriend): Promise<void> {
@@ -67,11 +67,11 @@ class FileShareModal extends SuggestModal<IFriend> {
 					if(this.file != null) {
 						this.plugin.fileRequestQueue.addRequest(this.file, friend);
 						if(this.plugin.settings.scanSendingFiles) {
-							this.plugin.fileTransmitter.scanFileAndSend(this.file, friend);
+							void this.plugin.fileTransmitter.scanFileAndSend(this.file, friend);
 						}
 					} else if(this.folder != null) {
 						// Send all files from folder
-						this.sendFolderFiles(this.folder, friend);
+						void this.sendFolderFiles(this.folder, friend);
 					}
 				} else {
 					new Notice(`${friend.username} is offline at the moment`);
@@ -109,7 +109,6 @@ class FileShareModal extends SuggestModal<IFriend> {
 
 				validFileCount++;
 			} else {
-				console.log(`Skipping invalid file: ${file.name} - ${validation.error}`);
 				invalidFileCount++;
 			}
 		}
