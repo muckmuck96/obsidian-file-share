@@ -1,3 +1,9 @@
+</br>
+
+![showcase](/assets/ObsidianFileShareShowCase.gif)
+
+</br>
+
 <h1 align="center">Obsidian Secure File-Sharing Plugin</h1>
 
 <p align="center">
@@ -19,13 +25,6 @@
 <div align="center">
 	Enables <b>end-to-end encrypted file sharing</b> via socket server, to directly share some obsidian files from one vault to another. Just exchange a key with your friends and save this into your friendlist and you are good to go...</br></br>
 </div>
-
----
-</br>
-
-![showcase](/assets/ObsidianFileShareShowCase.gif)
-
-</br>
 
 ---
 
