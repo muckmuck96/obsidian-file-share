@@ -21,7 +21,7 @@
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
     "@types/jest": "^30.0.0",
-    "@types/node": "^16.11.6",
+    "@types/node": "^26.2.0",
     "@types/simple-peer": "^9.11.8",
     "@typescript-eslint/eslint-plugin": "8.65.0",
     "@typescript-eslint/parser": "8.65.0",
