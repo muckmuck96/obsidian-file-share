@@ -19,7 +19,7 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/jest-dom": "^7.0.1",
     "@types/jest": "^30.0.0",
     "@types/node": "^16.11.6",
     "@types/simple-peer": "^9.11.8",
